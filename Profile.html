@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <script>if (!localStorage.getItem('fintech_token')) window.location.replace('index.html');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcoin - Dashboard</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        fintech: {
+                            primary: '#820AD1',
+                            hover: '#6A08A8',
+                            bg: '#F8F9FA',
+                            surface: '#ffffff',
+                            textMain: '#1A1A1A',
+                            textSec: '#6B7280',
+                            success: '#118C4F',
+                            danger: '#E52E2E',
+                        }
+                    },
+                    boxShadow: {
+                        'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body class="bg-fintech-bg font-sans text-fintech-textMain flex h-screen overflow-hidden relative">
+
+    <nav class="glass-nav w-64 h-full flex flex-col justify-between py-6 px-4 shadow-sm z-20 flex-shrink-0">
+        <div>
+            <div class="flex items-center mb-8 px-3 cursor-pointer">
+                <img src="assets/logos/transcoin-logo-dark-gradient.svg" alt="Transcoin Logo"
+                    class="h-14 w-auto object-contain">
+            </div>
+
+            <div class="space-y-1 overflow-y-auto max-h-[calc(100vh-200px)]">
+                <a href="#" id="navDashboard" onclick="switchView('dashboard')"
+                    class="flex items-center gap-3 px-3 py-2 bg-purple-50 text-fintech-primary rounded-lg font-bold text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                        </path>
+                    </svg>
+                    Panel Principal
+                </a>
+
+                <div class="pt-4 pb-1">
+                    <p class="px-3 text-xs font-semibold text-fintech-textSec uppercase tracking-wider">Operaciones</p>
+                </div>
+                <a href="#" id="navTransactions" onclick="switchView('transactions')"
+                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                        </path>
+                    </svg>
+                    Todos los Movimientos
+                </a>
+                <a href="#" id="navRefunds" onclick="switchView('refunds')"
+                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z">
+                        </path>
+                    </svg>
+                    Reembolsos
+                </a>
+
+                <div class="pt-4 pb-1">
+                    <p class="px-3 text-xs font-semibold text-fintech-textSec uppercase tracking-wider">Perfil</p>
+                </div>
+
+                <a href="#" id="menuMisTarjetas"
+                    class="hidden flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                        </path>
+                    </svg>
+                    Mis Tarjetas
+                </a>
+                <a href="#" id="navSettings" onclick="switchView('settings')"
+                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Configuración
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200">
+            <div class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-100 rounded-lg transition-colors mb-2">
+                <div id="sidebarUserInitials"
+                    class="w-8 h-8 rounded-full bg-fintech-primary text-white flex items-center justify-center font-bold text-sm">
+                    OP</div>
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-sm font-semibold truncate" id="sidebarUserName">Operador</p>
+                    <p class="text-xs text-fintech-textSec truncate" id="sidebarUserEmail">test@valorapay.com</p>
+                </div>
+            </div>
+            <button onclick="logout()"
+                class="w-full flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium text-sm transition-colors text-left">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                    </path>
+                </svg>
+                Cerrar Sesión
+            </button>
+        </div>
+    </nav>
+
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+        <div id="dashboardView">
+            <header class="flex justify-between items-center mb-6">
+                <div class="relative w-64 lg:w-96">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </span>
+                    <input type="text" placeholder="Search..."
+                        class="w-full bg-white border border-gray-200 text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent shadow-sm hidden md:block">
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <button
+                        class="bg-white border border-gray-200 p-2 rounded-lg text-gray-500 hover:text-black shadow-sm transition-colors shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                            </path>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="relative mb-8 rounded-2xl progressive-blur-header">
+                <div
+                    class="bg-gradient-to-r from-[#14141E] to-fintech-primary rounded-2xl p-6 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center text-white relative z-10 overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2">
+                    </div>
+
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold mb-2">Transaction Monitoring</h1>
+                        <p class="text-sm md:text-base text-gray-300">Monitor and manage your portfolio metrics in
+                            real-time.</p>
+                    </div>
+
+                    <div class="mt-4 md:mt-0 flex gap-3 z-10">
+                        <button onclick="document.getElementById('modalInvest').classList.remove('hidden')"
+                            class="bg-white text-black font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-gray-100 transition shadow-sm">
+                            Invertir
+                        </button>
+                        <button onclick="document.getElementById('modalWithdrawal').classList.remove('hidden')"
+                            class="bg-white text-black border border-gray-200 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition w-full md:w-auto shadow-sm">
+                            Retirar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenedor de Alertas de Inversión -->
+            <div id="investmentAlertContainer" class="w-full mb-6 empty:hidden transition-all duration-300"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Balance Total</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-textMain" id="uiTotalBalance">$0.00</h2>
+                        <div class="w-12 h-8 bg-blue-50 rounded bg-opacity-50 blur-[2px]"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Crecimiento Anual (ROI)</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-textMain cursor-default flex items-center"
+                            id="uiAnnualReturn">
+                            $0.00 <span class="text-fintech-success text-sm ml-2 font-medium"
+                                id="uiReturnRate">0.0%</span>
+                        </h2>
+                        <div class="w-12 h-8 bg-purple-50 rounded bg-opacity-50 blur-[2px]"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Depósitos Netos</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-textMain" id="uiNetDeposits">$0.00</h2>
+                        <div class="w-12 h-8 bg-green-50 rounded bg-opacity-50 blur-[2px]"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Perfil de Riesgo</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-xl font-bold text-fintech-primary" id="uiRiskProfile">Cargando...</h2>
+                        <div class="w-12 h-8 bg-gray-50 rounded bg-opacity-50 blur-[2px]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8 relative overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <div>
+                        <h3 class="font-bold text-lg">Proyección de Rendimientos</h3>
+                        <p class="text-sm text-gray-500">Estimación de crecimiento proyectando tu TNA actual.</p>
+                    </div>
+                    <div class="mt-4 md:mt-0 flex gap-2">
+                        <span
+                            class="px-3 py-1 bg-purple-50 text-fintech-primary text-xs font-bold rounded-full border border-purple-100">
+                            Cálculo de Proyección Compuesta
+                        </span>
+                    </div>
+                </div>
+                <div class="w-full h-64 relative">
+                    <canvas id="projectionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                    <h3 class="font-bold text-lg">Historial de Transacciones</h3>
+                    <button
+                        class="flex items-center gap-2 text-sm text-fintech-primary font-medium hover:text-fintech-hover">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        Exportar
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-gray-50 text-fintech-textSec">
+                            <tr>
+                                <th class="px-6 py-4 font-medium">FECHA</th>
+                                <th class="px-6 py-4 font-medium">DESCRIPCIÓN</th>
+                                <th class="px-6 py-4 font-medium">TIPO</th>
+                                <th class="px-6 py-4 font-medium">MONTO</th>
+                                <th class="px-6 py-4 font-medium">ESTATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="transactionsTableBody">
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-gray-400 animate-pulse">
+                                    Cargando historial financiero...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id="allTransactionsView" class="hidden">
+            <h2 class="text-3xl font-bold mb-6 text-fintech-textMain">Todos los Movimientos</h2>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                    <h3 class="font-bold text-lg">Historial Completo</h3>
+                    <button
+                        class="flex items-center gap-2 text-sm text-fintech-primary font-medium hover:text-fintech-hover">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                        Exportar CSV
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-gray-50 text-fintech-textSec">
+                            <tr>
+                                <th class="px-6 py-4 font-medium">FECHA</th>
+                                <th class="px-6 py-4 font-medium">DESCRIPCIÓN</th>
+                                <th class="px-6 py-4 font-medium">TIPO</th>
+                                <th class="px-6 py-4 font-medium">MONTO</th>
+                                <th class="px-6 py-4 font-medium">ESTATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100" id="allTransactionsTableBody">
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-gray-400">Cargando datos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="refundsView" class="hidden">
+            <h2 class="text-3xl font-bold mb-6 text-fintech-textMain">Reembolsos</h2>
+            <div
+                class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 flex flex-col items-center justify-center text-center">
+                <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">No hay reembolsos activos</h3>
+                <p class="text-gray-500 max-w-md">Actualmente no tienes solicitudes de devolución en proceso. Cualquier
+                    contracargo o reembolso de comercios aparecerá en esta sección.</p>
+            </div>
+        </div>
+
+        <div id="settingsView" class="hidden max-w-3xl">
+            <h2 class="text-3xl font-bold mb-6 text-fintech-textMain">Configuración</h2>
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+
+                <form id="settingsForm" onsubmit="handleProfileUpdate(event)">
+
+                    <div class="mb-8">
+                        <h4 class="text-lg font-bold text-gray-800 mb-4">Información Personal</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                                <input type="text" id="settingFirstName" readonly value="Cargando..."
+                                    class="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-3 font-bold text-black focus:outline-none cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
+                                <input type="text" id="settingLastName" readonly value="Cargando..."
+                                    class="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-3 font-bold text-black focus:outline-none cursor-not-allowed">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                                <input type="email" id="settingEmail" readonly value="Cargando..."
+                                    class="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-3 font-bold text-black focus:outline-none cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono Móvil</label>
+                                <input type="tel" id="settingPhone" name="phone" placeholder="+52 000 000 0000"
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent font-medium text-gray-900 bg-white shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-lg font-bold mb-4">Documentación y Avatar</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Foto de Perfil (Avatar)</label>
+                            <div
+                                class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-fintech-primary transition bg-gray-50">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
+                                        viewBox="0 0 48 48">
+                                        <path
+                                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600 justify-center">
+                                        <label
+                                            class="relative cursor-pointer bg-white rounded-md font-medium text-fintech-primary hover:text-fintech-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-fintech-primary px-1">
+                                            <span>Subir un archivo</span>
+                                            <input name="avatar" type="file" class="sr-only" accept="image/*">
+                                        </label>
+                                        <p class="pl-1">o arrastra y suelta</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PNG, JPG hasta 5MB</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Documento de Identidad
+                                (KYC)</label>
+                            <div
+                                class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-fintech-primary transition bg-gray-50">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                        </path>
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600 justify-center">
+                                        <label
+                                            class="relative cursor-pointer bg-white rounded-md font-medium text-fintech-primary hover:text-fintech-hover focus-within:outline-none px-1">
+                                            <span>Sube tu INE/Pasaporte</span>
+                                            <input name="kycDocument" type="file" class="sr-only" accept=".pdf,image/*">
+                                        </label>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PDF o Imagen visible</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-200 flex justify-end">
+                        <button type="submit" id="btnUpdateProfile"
+                            class="bg-fintech-primary text-white font-bold px-8 py-3 rounded-lg hover:bg-fintech-hover transition shadow-sm w-full md:w-auto">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalInvest" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm shadow-xl"
+            onclick="document.getElementById('modalInvest').classList.add('hidden')"></div>
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold">Nueva Inversión</h3>
+                <button onclick="document.getElementById('modalInvest').classList.add('hidden')"
+                    class="text-gray-400 hover:text-black transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <div class="flex border-b border-gray-200 px-6 pt-2 gap-6" id="investTabs">
+                <button class="pb-3 border-b-2 border-fintech-primary font-semibold text-fintech-primary font-medium"
+                    data-target="tab-transfer">Transferencia</button>
+                <button
+                    class="pb-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition"
+                    data-target="tab-oxxo">OXXO</button>
+                <button
+                    class="pb-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium transition"
+                    data-target="tab-codi">CoDi</button>
+            </div>
+            <div class="p-6">
+                <div id="tab-transfer" class="tab-pane block">
+                    <p class="text-sm text-gray-600 mb-4">Transfiere a la siguiente cuenta CLABE desde tu banca móvil.
+                        El depósito se reflejará en minutos.</p>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+                        <p class="text-xs text-gray-500 font-medium mb-1">Banco</p>
+                        <p class="font-semibold mb-3">STP (Sistema de Transferencias y Pagos)</p>
+                        <p class="text-xs text-gray-500 font-medium mb-1">CLABE</p>
+                        <div class="flex items-center justify-between">
+                            <p class="font-bold font-mono tracking-widest text-lg">000 123 4567 8901 2345</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="tab-oxxo" class="tab-pane hidden">
+                    <p class="text-sm text-gray-600 mb-4">Dicta este número en caja o muestra el código de barras.</p>
+                    <div
+                        class="bg-gray-50 p-4 rounded-lg flex flex-col items-center justify-center border border-gray-200">
+                        <p class="font-mono font-bold tracking-[0.2em] mt-3">1234 5678 9012 3456</p>
+                    </div>
+                </div>
+                <div id="tab-codi" class="tab-pane hidden">
+                    <p class="text-sm text-gray-600 mb-4 text-center">Escanea el código QR desde la app de tu banco.</p>
+                </div>
+            </div>
+            <div class="p-6 pt-0 mt-auto">
+                <button onclick="document.getElementById('modalInvest').classList.add('hidden')"
+                    class="w-full bg-black text-white font-semibold py-3 rounded-xl hover:bg-gray-800 transition shadow-sm">
+                    Listo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalWithdrawal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm shadow-xl transition-opacity"
+            onclick="closeWithdrawalModal()"></div>
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-xl font-bold text-gray-800">Transferencia SPEI</h3>
+                <button id="closeWithdrawalBtn" onclick="closeWithdrawalModal()"
+                    class="text-gray-400 hover:text-black transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="withdrawalStateForm" class="block">
+                <form onsubmit="handleWithdrawalSubmit(event)" class="p-6">
+                    <p class="text-sm text-gray-600 mb-6">El monto retirado se transferirá a tu cuenta asociada tras la
+                        validación de seguridad.</p>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Monto a Retirar (MXN)</label>
+                        <div class="relative">
+                            <span
+                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-bold">$</span>
+                            <input type="number" step="0.01" min="100" name="withdrawalAmount" placeholder="0.00"
+                                required
+                                class="w-full border border-gray-300 rounded-lg pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent font-medium">
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">CLABE de Destino (18
+                            dígitos)</label>
+                        <input type="text" maxlength="18" minlength="18" pattern="[0-9]{18}" name="withdrawalClabe"
+                            placeholder="000000000000000000" required
+                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent font-mono tracking-widest text-sm text-gray-800 placeholder-gray-300">
+                    </div>
+                    <div class="flex justify-end pt-4">
+                        <button type="submit"
+                            class="bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition w-full">Solicitar
+                            Retiro</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="withdrawalStateProcessing" class="hidden p-10 text-center">
+                <div
+                    class="inline-block animate-spin rounded-full h-14 w-14 border-4 border-gray-200 border-t-fintech-primary mb-4">
+                </div>
+                <h4 class="text-lg font-bold text-gray-800 mb-2">Procesando Transferencia...</h4>
+                <p class="text-sm text-gray-500" id="processingText">Conectando con red interbancaria...</p>
+            </div>
+
+            <div id="withdrawalStateResult" class="hidden p-8 text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                    <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                </div>
+                <h4 class="text-xl font-bold text-gray-800 mb-2">Transacción Retenida</h4>
+                <p class="text-sm text-gray-600 mb-8 px-4" id="resultText">El mensaje de error aparecerá aquí.</p>
+                <button type="button" onclick="closeWithdrawalModal()"
+                    class="bg-gray-100 text-gray-800 px-6 py-3 rounded-lg font-bold hover:bg-gray-200 transition w-full">
+                    Entendido
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+
+    <script src="js/shield.js"></script>
+    <script src="js/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

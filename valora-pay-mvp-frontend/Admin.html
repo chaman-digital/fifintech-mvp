@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValoraPay - Admin Dashboard</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (CDN Autocontenido) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        fintech: {
+                            primary: '#820AD1',
+                            hover: '#6A08A8',
+                            bg: '#F8F9FA',
+                            surface: '#ffffff',
+                            textMain: '#1A1A1A',
+                            textSec: '#6B7280',
+                            success: '#118C4F',
+                            danger: '#E52E2E',
+                        }
+                    },
+                    boxShadow: {
+                        'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* UI/UX Visual Standards */
+        .glass-nav {
+            backdrop-filter: blur(10px) saturate(180%);
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(209, 213, 219, 0.3);
+        }
+
+        .progressive-blur-header {
+            position: relative;
+            z-index: 1;
+        }
+
+        .progressive-blur-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, rgba(20, 20, 30, 1) 0%, rgba(130, 10, 209, 1) 100%);
+            border-radius: 1rem;
+            filter: blur(8px);
+            opacity: 0.8;
+            transform: scale(0.98) translateY(4px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Predictive Search Dropdown Fixes */
+        #searchResults {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-fintech-bg font-sans text-fintech-textMain flex h-screen overflow-hidden">
+
+    <!-- Modo Suplantación Banner (Inicialmente Oculto) -->
+    <div id="impersonationBanner"
+        class="hidden fixed top-0 w-full bg-gray-900 border-b border-gray-700 text-white z-50 px-6 py-3 flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-4">
+            <span class="inline-flex items-center h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+            <div>
+                <span class="font-bold text-sm tracking-wide text-red-400">MODO VISTA DE USUARIO</span>
+                <span class="text-xs text-gray-400 ml-2" id="impersonationUserName">Suplantando a: ---</span>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="exitImpersonation()"
+                class="text-sm font-medium hover:text-gray-300 transition flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Volver
+            </button>
+            <button onclick="exitImpersonation()"
+                class="bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1 rounded text-sm font-semibold hover:bg-red-500/20 transition">
+                Cerrar Suplantación
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav
+        class="glass-nav w-64 h-full flex flex-col justify-between py-6 px-4 shadow-sm z-20 flex-shrink-0 transition-transform duration-300">
+        <div>
+            <!-- Logo -->
+            <div class="flex items-center gap-2 mb-8 px-2 cursor-pointer">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" stroke="#1A1A1A" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M2 17L12 22L22 17" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M2 12L12 17L22 12" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <span class="font-bold text-xl tracking-tight">ValoraPay</span>
+            </div>
+
+            <!-- Menus -->
+            <div class="space-y-1 overflow-y-auto max-h-[calc(100vh-200px)]">
+                <a href="#"
+                    class="flex items-center gap-3 px-3 py-2 bg-black text-white rounded-lg font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                        </path>
+                    </svg>
+                    Dashboard Admin
+                </a>
+
+                <div class="pt-4 pb-1">
+                    <p class="px-3 text-xs font-semibold text-fintech-textSec uppercase tracking-wider">Gestión</p>
+                </div>
+                <a href="#"
+                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                    Manejo de Usuarios
+                </a>
+                <a href="#"
+                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    Reportes y Auditoría
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-200">
+            <div
+                class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-100 rounded-lg cursor-pointer transition-colors">
+                <div
+                    class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-sm">
+                    AD</div>
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-sm font-semibold text-black truncate">Admin Master</p>
+                    <p class="text-xs text-fintech-textSec truncate">admin@valorapay.com</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative transition-all duration-300" id="mainContent">
+        <!-- Top App Bar -->
+        <header class="flex justify-between items-center mb-6">
+            <div class="relative w-64 lg:w-96">
+                <!-- Predictive Search Input (Admin Global) -->
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </span>
+                <input type="text" id="adminGlobalSearch" placeholder="Atajo rápido de usuarios (Ej. Juan)..."
+                    class="w-full bg-white border border-gray-200 text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent shadow-sm hidden md:block">
+            </div>
+
+            <div class="flex items-center gap-4">
+                <!-- Botón Crear Usuario -->
+                <button onclick="document.getElementById('modalCreateUser').classList.remove('hidden')"
+                    class="bg-black text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Nuevo Usuario
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Area -->
+        <div id="dashboardView">
+            <!-- Huge Gradient Header (Admin Version) -->
+            <div class="relative mb-8 rounded-2xl progressive-blur-header">
+                <div
+                    class="bg-gradient-to-r from-gray-900 to-indigo-900 rounded-2xl p-6 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center text-white relative z-10 overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2">
+                    </div>
+
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold mb-2">Admin Dashboard</h1>
+                        <p class="text-sm md:text-base text-gray-300">Monitoreo global del rendimiento del portafolio y
+                            operaciones.</p>
+                    </div>
+
+                    <div class="mt-4 md:mt-0 flex gap-3 z-10">
+                        <button onclick="document.getElementById('modalRegisterPayment').classList.remove('hidden')"
+                            class="bg-white text-black font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-gray-100 transition shadow-sm flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Registrar Pago
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Total AUM (Activos Bajo Gestión)</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-textMain" id="adminTotalAUM">$1,250,500.00</h2>
+                        <span class="text-xs bg-green-100 text-green-700 px-2 rounded-full font-bold">+12%</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Transacciones del Mes</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-textMain">1,432</h2>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 rounded-full font-bold">Volumen:
+                            Elevado</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Rendimientos Pagados</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-textMain">$85,200.00</h2>
+                        <span class="text-xs bg-purple-100 text-fintech-primary px-2 rounded-full font-bold">Auto</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Usuarios Activos</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-primary">850</h2>
+                        <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full border-2 border-white bg-blue-500"></div>
+                            <div class="w-6 h-6 rounded-full border-2 border-white bg-red-400"></div>
+                            <div class="w-6 h-6 rounded-full border-2 border-white bg-green-400"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Database Table -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                    <h3 class="font-bold text-lg">Directorio de Inversionistas</h3>
+                    <div class="relative w-64">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </span>
+                        <input type="text" id="adminTableSearch" placeholder="Buscar por email, nombre o ID..."
+                            class="w-full bg-white border border-gray-200 text-sm rounded-md pl-9 pr-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-fintech-primary">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead
+                            class="bg-white border-b border-gray-100 text-xs uppercase text-fintech-textSec tracking-wide">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold">Inversionista</th>
+                                <th class="px-6 py-4 font-semibold">TNA (%)</th>
+                                <th class="px-6 py-4 font-semibold">Balance Total</th>
+                                <th class="px-6 py-4 font-semibold">Perfil</th>
+                                <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 bg-white" id="adminUsersTableBody">
+                            <!-- JS Will Populate This. Static example for visual structure -->
+                            <tr class="hover:bg-blue-50/50 transition cursor-pointer group"
+                                onclick="simulateImpersonation(1, 'John Doe')">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <div
+                                            class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold mr-3">
+                                            JD</div>
+                                        <div>
+                                            <p
+                                                class="font-medium text-black group-hover:text-fintech-primary transition">
+                                                John Doe</p>
+                                            <p class="text-xs text-gray-500">john.doe@example.com</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-fintech-success">12.5%</td>
+                                <td class="px-6 py-4 font-bold">$150,000.00</td>
+                                <td class="px-6 py-4"><span
+                                        class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs">Moderado</span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button
+                                        class="text-fintech-textSec hover:text-fintech-primary p-1 bg-gray-50 hover:bg-gray-100 rounded border border-transparent hover:border-gray-200 transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placeholder para inyectar Profile.html (Modo Suplantación) -->
+        <div id="impersonationContainer"
+            class="hidden w-full h-full bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
+            <!-- Overlay to block clicks on financial actions inside iframe/container -->
+            <div class="absolute inset-0 z-40 bg-transparent pointer-events-none" id="impersonationShieldOverlay"></div>
+            <!-- Iframe para Cargar CUALQUIER profile puro y funcional, pero read-only en acciones seguras -->
+            <iframe id="impersonationFrame" src="" class="w-full h-[calc(100vh-140px)] border-0"></iframe>
+        </div>
+
+    </main>
+
+    <!-- ==========================================
+         MODALES
+         ========================================== -->
+
+    <!-- Modal Registrar Pago -->
+    <div id="modalRegisterPayment" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modalRegisterPayment').classList.add('hidden')"></div>
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <h3 class="text-lg font-bold">Registrar Transacción (API)</h3>
+                <button onclick="document.getElementById('modalRegisterPayment').classList.add('hidden')"
+                    class="text-gray-400 hover:text-black transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="formRegisterPayment" class="p-6">
+                <!-- Predictive Search Input -->
+                <div class="mb-4 relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Buscar Beneficiario</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </span>
+                        <input type="text" id="predictiveSearchInput" autocomplete="off"
+                            placeholder="Escribe el nombre o email..."
+                            class="w-full border border-gray-300 rounded-lg pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent">
+                    </div>
+                    <!-- Dropdown Resutados Predicativos -->
+                    <div id="predictiveResults"
+                        class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg hidden">
+                        <ul class="py-1 text-sm text-gray-700" id="predictiveResultsList">
+                            <!-- Inyectado por JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Campos Ocultos para enviar a la BD -->
+                <input type="hidden" id="selectedUserId" name="userId">
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Operación</label>
+                        <select
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent bg-white">
+                            <option value="deposit">Abono (Depósito/Inversión)</option>
+                            <option value="withdrawal">Cargo (Retiro)</option>
+                            <option value="yield">Rendimiento Generado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Monto (MXN)</label>
+                        <div class="relative">
+                            <span
+                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-medium">$</span>
+                            <input type="number" step="0.01" placeholder="0.00"
+                                class="w-full border border-gray-300 rounded-lg pl-8 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Concepto o Descripción</label>
+                    <input type="text" placeholder="Ej. Depósito Inicial STP"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent">
+                </div>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button"
+                        onclick="document.getElementById('modalRegisterPayment').classList.add('hidden')"
+                        class="px-5 py-2.5 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition">Cancelar</button>
+                    <button type="submit"
+                        class="bg-fintech-primary text-white px-6 py-2.5 rounded-lg font-bold hover:bg-fintech-hover transition shadow-sm">Aplicar
+                        Transacción</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/shield.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

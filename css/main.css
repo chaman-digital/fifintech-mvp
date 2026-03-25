@@ -1,0 +1,104 @@
+/* ==========================================================================
+   Transcoin Global Stylesheet
+   Consolidated styles for UI/UX standardization across all views.
+   ========================================================================== */
+
+/* 1. Base & Typography */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar (Global application) */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* ==========================================================================
+   2. Components & UI Elements
+   ========================================================================== */
+
+/* Efecto de blur en la barra de navegación (Landing Page) */
+.nav-glass {
+    backdrop-filter: blur(12px) saturate(180%);
+    background-color: rgba(20, 15, 30, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Efecto de blur en la barra lateral de navegación (Dashboards) */
+.glass-nav {
+    backdrop-filter: blur(10px) saturate(180%);
+    background-color: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(209, 213, 219, 0.3);
+}
+
+/* Header con Gradiente y Blur progresivo (Dashboards) */
+.progressive-blur-header {
+    position: relative;
+    z-index: 1;
+}
+
+.progressive-blur-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background: linear-gradient(135deg, rgba(20, 20, 30, 1) 0%, rgba(130, 10, 209, 1) 100%);
+    border-radius: 1rem;
+    filter: blur(8px);
+    opacity: 0.8;
+    transform: scale(0.98) translateY(4px);
+}
+
+/* Estilos base para botones abstractos (Neon/Glow) */
+.btn-glow {
+    box-shadow: 0 0 20px rgba(130, 10, 209, 0.4);
+    transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+    box-shadow: 0 0 30px rgba(130, 10, 209, 0.6);
+    transform: translateY(-2px);
+}
+
+/* Limitación de altura para Dropdowns (Predictive Search / Autocomplete) */
+#searchResults, #predictiveResultsList {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* ==========================================================================
+   3. Animations
+   ========================================================================== */
+
+/* Animaciones sutiles para los elementos hero (Flotación) */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+    animation: float 6s ease-in-out infinite;
+    animation-delay: 2s;
+}

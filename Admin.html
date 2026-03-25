@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <script>if (!localStorage.getItem('fintech_token')) window.location.replace('index.html');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcoin - Admin Dashboard</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+
+    <!-- Google Fonts: Inter -->
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (CDN Autocontenido) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        fintech: {
+                            primary: '#820AD1',
+                            hover: '#6A08A8',
+                            bg: '#F8F9FA',
+                            surface: '#ffffff',
+                            textMain: '#1A1A1A',
+                            textSec: '#6B7280',
+                            success: '#118C4F',
+                            danger: '#E52E2E',
+                        }
+                    },
+                    boxShadow: {
+                        'sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        'xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body class="bg-fintech-bg font-sans text-fintech-textMain flex h-screen overflow-hidden">
+
+    <!-- Modo Suplantación Banner (Inicialmente Oculto) -->
+    <div id="impersonationBanner"
+        class="hidden fixed top-0 w-full bg-gray-900 border-b border-gray-700 text-white z-50 px-6 py-3 flex justify-between items-center shadow-lg">
+        <div class="flex items-center gap-4">
+            <span class="inline-flex items-center h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+            <div>
+                <span class="font-bold text-sm tracking-wide text-red-400">MODO VISTA DE USUARIO</span>
+                <span class="text-xs text-gray-400 ml-2" id="impersonationUserName">Suplantando a: ---</span>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="exitImpersonation()"
+                class="text-sm font-medium hover:text-gray-300 transition flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Volver
+            </button>
+            <button onclick="exitImpersonation()"
+                class="bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1 rounded text-sm font-semibold hover:bg-red-500/20 transition">
+                Cerrar Suplantación
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav
+        class="glass-nav w-64 h-full flex flex-col justify-between py-6 px-4 shadow-sm z-20 flex-shrink-0 transition-transform duration-300">
+        <div>
+            <!-- Logo -->
+            <div class="flex items-center mb-8 px-3 cursor-pointer">
+                <img src="assets/logos/transcoin-logo-dark-gradient.svg" alt="Transcoin Logo"
+                    class="h-14 w-auto object-contain">
+            </div>
+
+            <!-- Menus -->
+            <div class="space-y-1 overflow-y-auto max-h-[calc(100vh-200px)]">
+                <a href="#" id="navAdminDash"
+                    class="flex items-center gap-3 px-3 py-2 bg-black text-white rounded-lg font-medium text-sm transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                        </path>
+                    </svg>
+                    Dashboard General
+                </a>
+
+                <div class="pt-4 pb-1">
+                    <p class="px-3 text-xs font-semibold text-fintech-textSec uppercase tracking-wider">Gestión</p>
+                </div>
+
+                <a href="#" id="navAdminUsers"
+                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors mt-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                    Gestión de Usuarios
+                </a>
+
+                <!-- Configuración Global (Solo Admin Master) -->
+                <a href="#" id="navAdminSettings"
+                    class="admin-only-feature flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors mt-2 border-t border-gray-100 pt-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Configuración Global
+                </a>
+            </div>
+        </div>
+
+        <!-- User Profile & Logout -->
+        <div class="mt-4 pt-4 border-t border-gray-200">
+            <div
+                class="flex items-center gap-3 px-3 py-2 w-full hover:bg-gray-100 rounded-lg cursor-pointer transition-colors mb-2">
+                <div
+                    class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-sm">
+                    AD</div>
+                <div class="flex-1 overflow-hidden">
+                    <p class="text-sm font-semibold text-black truncate">Admin Master</p>
+                    <p class="text-xs text-fintech-textSec truncate">admin@valorapay.com</p>
+                </div>
+            </div>
+            <button onclick="logout()"
+                class="w-full flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg font-medium text-sm transition-colors text-left">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                    </path>
+                </svg>
+                Cerrar Sesión
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative transition-all duration-300" id="mainContent">
+
+        <!-- Top App Bar (Barra Superior Global) -->
+        <header class="flex justify-between items-center mb-6">
+            <div class="relative w-64 lg:w-96">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </span>
+                <input type="text" id="adminGlobalSearch" placeholder="Atajo rápido de usuarios (Ej. Juan)..."
+                    class="w-full bg-white border border-gray-200 text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent shadow-sm hidden md:block">
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Funciones Globales Extra -->
+            </div>
+        </header>
+
+        <!-- ==========================================
+             VISTA 1: DASHBOARD GENERAL
+             ========================================== -->
+        <div id="adminDashView" class="block animate-fade-in">
+            <div class="relative mb-8 rounded-2xl progressive-blur-header">
+                <div
+                    class="bg-gradient-to-r from-gray-900 to-indigo-900 rounded-2xl p-6 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center text-white relative z-10 overflow-hidden">
+                    <div
+                        class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold mb-2">Admin Dashboard</h1>
+                        <p class="text-sm md:text-base text-gray-300">Monitoreo global del rendimiento del portafolio y
+                            operaciones.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Total AUM (Activos Bajo Gestión)</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-textMain" id="adminTotalAUM">$0.00</h2>
+                        <span class="text-xs bg-green-100 text-green-700 px-2 rounded-full font-bold">+12%</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Transacciones del Mes</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-textMain" id="adminTotalTransactions">0</h2>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 rounded-full font-bold">Volumen:
+                            Elevado</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Rendimientos Pagados</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-textMain" id="adminTotalYields">$0.00</h2>
+                        <span class="text-xs bg-purple-100 text-fintech-primary px-2 rounded-full font-bold">Auto</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                    <p class="text-sm font-medium text-fintech-textSec mb-1">Usuarios Activos</p>
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-2xl font-bold text-fintech-primary" id="adminActiveUsers">0</h2>
+                        <div class="flex -space-x-2">
+                            <div class="w-6 h-6 rounded-full border-2 border-white bg-blue-500"></div>
+                            <div class="w-6 h-6 rounded-full border-2 border-white bg-red-400"></div>
+                            <div class="w-6 h-6 rounded-full border-2 border-white bg-green-400"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INYECCIÓN NUEVA: GRÁFICO Y TABLA RECIENTE (Asalto 3.1) -->
+            <div class="flex flex-col gap-6 mb-8 w-full">
+                <!-- Contenedor Gráfica (100%) -->
+                <div class="w-full bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-lg text-gray-800 mb-4">Evolución de AUM y Operaciones</h3>
+                    <div class="relative w-full h-[320px]">
+                        <canvas id="adminMainChart"></canvas>
+                    </div>
+                </div>
+                <!-- Contenedor Últimos Movimientos (100%) -->
+                <div class="w-full bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg text-gray-800">Últimos Movimientos</h3>
+                        <button onclick="showAdminAllTransactions()" class="text-fintech-primary text-sm font-medium hover:underline">Ver todos</button>
+                    </div>
+                    <div class="flex-1 w-full overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="text-xs uppercase text-gray-400 border-b border-gray-100">
+                                <tr>
+                                    <th class="pb-3 font-semibold px-4">Usuario</th>
+                                    <th class="pb-3 font-semibold px-4">Fecha</th>
+                                    <th class="pb-3 font-semibold px-4">Tipo</th>
+                                    <th class="pb-3 font-semibold px-4 text-right">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminRecentTransactionsBody" class="divide-y divide-gray-50">
+                                <!-- Filas inyectadas por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             VISTA NUEVA: HISTORIAL DE TRANSACCIONES GLOBALES
+             ========================================== -->
+        <div id="adminAllTransactionsView" class="hidden animate-fade-in w-full">
+            <div class="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <button onclick="showAdminDashboard()" class="text-gray-500 hover:text-fintech-primary text-sm flex items-center gap-2 mb-2 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                        Volver al Dashboard
+                    </button>
+                    <h2 class="text-2xl font-bold text-gray-900">Historial Global de Transacciones</h2>
+                    <p class="text-sm text-gray-500">Consulta y busca todos los movimientos de la plataforma.</p>
+                </div>
+                <div class="relative w-full md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </span>
+                    <input type="text" placeholder="Buscar transacción (Usuario, ID, Tipo)..." class="w-full bg-white border border-gray-200 text-sm rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent shadow-sm">
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden w-full mb-8">
+                <div class="overflow-x-auto w-full">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="text-xs uppercase text-gray-500 bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold text-gray-600">ID / Ref</th>
+                                <th class="px-6 py-4 font-semibold text-gray-600">Usuario</th>
+                                <th class="px-6 py-4 font-semibold text-gray-600">Fecha</th>
+                                <th class="px-6 py-4 font-semibold text-gray-600">Tipo</th>
+                                <th class="px-6 py-4 font-semibold text-gray-600 text-right">Monto</th>
+                                <th class="px-6 py-4 font-semibold text-gray-600 px-6 text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminGlobalTransactionsBody" class="divide-y divide-gray-50">
+                            <!-- JS inyectará el contenido simulado -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Paginación -->
+                <div class="px-6 py-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between text-sm text-gray-500 bg-gray-50/50 gap-4">
+                    <p>Mostrando <span class="font-medium text-black">1 - 10</span> de <span class="font-medium text-black">150</span> resultados</p>
+                    <div class="flex items-center gap-2">
+                        <button class="px-3 py-1.5 border border-gray-200 rounded text-gray-400 hover:text-black hover:border-gray-300 transition bg-white" disabled>Anterior</button>
+                        <button class="px-3 py-1.5 bg-fintech-primary text-white rounded shadow-sm hover:bg-fintech-hover transition">1</button>
+                        <button class="px-3 py-1.5 border border-gray-200 rounded hover:bg-gray-50 text-gray-600 bg-white transition">2</button>
+                        <button class="px-3 py-1.5 border border-gray-200 rounded hover:bg-gray-50 text-gray-600 bg-white transition">3</button>
+                        <span class="px-2">...</span>
+                        <button class="px-3 py-1.5 border border-gray-200 rounded hover:bg-gray-50 text-gray-600 bg-white transition">Siguiente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             VISTA 2: GESTIÓN DE USUARIOS
+             ========================================== -->
+        <div id="adminUsersView" class="hidden animate-fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Directorio de Inversionistas</h2>
+                    <p class="text-sm text-gray-500">Administra cuentas, perfiles de riesgo y operaciones de clientes.
+                    </p>
+                </div>
+                <button onclick="document.getElementById('modalCreateUser').classList.remove('hidden')"
+                    class="bg-black text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition shadow-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Crear Nuevo Usuario
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex justify-end items-center bg-gray-50/50">
+                    <div class="relative w-full md:w-80">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </span>
+                        <input type="text" id="adminTableSearch" placeholder="Filtro rápido en tabla..."
+                            class="w-full bg-white border border-gray-200 text-sm rounded-md pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-fintech-primary">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead
+                            class="bg-white border-b border-gray-100 text-xs uppercase text-fintech-textSec tracking-wide">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold">Inversionista</th>
+                                <th class="px-6 py-4 font-semibold">TNA (%)</th>
+                                <th class="px-6 py-4 font-semibold">Balance Total</th>
+                                <th class="px-6 py-4 font-semibold">Perfil</th>
+                                <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersTableBody" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-gray-400 animate-pulse">
+                                    Cargando directorio de inversionistas...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             VISTA 3: CONFIGURACIÓN GLOBAL
+             ========================================== -->
+        <div id="adminSettingsView" class="hidden animate-fade-in">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Configuración Global</h2>
+                <p class="text-sm text-gray-500">Parámetros operativos y cuentas destino de fondeo del sistema.</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 bg-gray-50/50">
+                    <h3 class="font-bold text-lg text-gray-800">Cuentas Destino (Fondeo)</h3>
+                    <p class="text-xs text-gray-500">Esta información se mostrará a los usuarios al fondear su cuenta.
+                    </p>
+                </div>
+
+                <form id="globalSettingsForm" class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Banco Institucional</label>
+                            <input type="text" id="settingBank"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary"
+                                placeholder="Ej. STP">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Titular de la Cuenta</label>
+                            <input type="text" id="settingAccountHolder"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary"
+                                placeholder="Ej. FINTECH SA DE CV">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Número de Cuenta</label>
+                            <input type="text" id="settingAccountNumber"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">CLABE Interbancaria</label>
+                            <input type="text" id="settingClabe"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Texto Institucional OXXO /
+                                Físico</label>
+                            <textarea id="settingOxxoText" rows="2"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary"
+                                placeholder="Instrucciones para cajeros OXXO..."></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Link de Pago CoDi
+                                (Opcional)</label>
+                            <input type="url" id="settingCodiLink"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary"
+                                placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-4 border-t border-gray-100">
+                        <button type="submit"
+                            class="bg-black text-white px-6 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition shadow-sm">
+                            Guardar Configuración
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             SLIDE-OVER: GESTIÓN DE USUARIO
+             ========================================== -->
+        <div id="userPanelSlideOver" class="fixed inset-0 z-50 hidden">
+            <!-- Overlay oscuro reaccionario -->
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0"
+                id="userPanelOverlay" onclick="closeUserPanel()"></div>
+
+            <!-- Panel lateral derecho Slide-over -->
+            <div class="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col"
+                id="userPanelContent">
+
+                <!-- Header del Panel -->
+                <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 truncate" id="panelUserName">Nombre del Usuario</h3>
+                        <p class="text-sm text-gray-500 font-mono truncate" id="panelUserEmail">usuario@email.com</p>
+                    </div>
+                    <button onclick="closeUserPanel()"
+                        class="text-gray-400 hover:text-black transition p-2 rounded-full hover:bg-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Contenido Scrollable -->
+                <div class="flex-1 overflow-y-auto p-6 space-y-8">
+
+                    <!-- SECCIÓN 1: PERFIL Y RIESGO -->
+                    <section>
+                        <h4
+                            class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Perfil Financiero
+                        </h4>
+                        <form id="formUserProfile" class="space-y-4">
+                            <input type="hidden" id="panelUserId">
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Perfil de Riesgo</label>
+                                <select id="panelRiskProfile"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
+                                    <option value="Conservador">Conservador (Bajo Riesgo)</option>
+                                    <option value="Moderado">Moderado (Riesgo Medio)</option>
+                                    <option value="Agresivo">Agresivo (Alto Riesgo)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tasa de Rendimiento Anual
+                                    (%)</label>
+                                <div class="relative">
+                                    <input type="number" step="0.01" id="panelAnnualReturnRate" placeholder="Ej. 12.5"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary pr-8">
+                                    <span class="absolute right-3 top-2.5 text-gray-400 font-medium">%</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Periodo
+                                        Inversión</label>
+                                    <select id="panelInvestmentPeriod"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
+                                        <option value="Mensual">Mensual</option>
+                                        <option value="Quincenal">Quincenal</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Próxima Fecha</label>
+                                    <input type="date" id="panelNextInvestmentDate"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="button" onclick="saveUserProfile()"
+                                    class="bg-gray-800 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-black transition shadow-sm">
+                                    Guardar Perfil
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- SECCIÓN 2: REGISTRAR TRANSACCIÓN DIRECTA -->
+                    <section>
+                        <h4
+                            class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 pb-2 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Registrar Transacción (Directa)
+                        </h4>
+                        <form id="formDirectTransaction"
+                            class="space-y-4 bg-fintech-bg/50 p-5 rounded-xl border border-gray-200 shadow-inner">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                    <select id="transType"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
+                                        <option value="deposit">Abono (+)</option>
+                                        <option value="withdrawal">Cargo (-)</option>
+                                        <option value="yield">Rendimiento (+)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Monto (MXN)</label>
+                                    <div class="relative">
+                                        <span
+                                            class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-medium text-sm">$</span>
+                                        <input type="number" step="0.01" id="transAmount" placeholder="0.00"
+                                            class="w-full border border-gray-300 rounded-lg pl-7 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Num. Autorización /
+                                    Referencia</label>
+                                <input type="text" id="transAuthNumber" placeholder="Ej. 123456789"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary uppercase font-mono">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Comprobante</label>
+                                <input type="date" id="transCustomDate"
+                                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                            </div>
+
+                            <button type="button" onclick="registerDirectTransaction()"
+                                class="w-full bg-fintech-primary text-white px-4 py-3 rounded-lg text-sm font-bold hover:bg-fintech-hover transition shadow-sm flex items-center justify-center gap-2 mt-2">
+                                Aplicar
+                            </button>
+                        </form>
+                    </section>
+
+                </div>
+
+                <!-- Footer del Panel (Acciones Especiales) -->
+                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col gap-3">
+                    <button onclick="loginAsUser()"
+                        class="w-full bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-gray-50 transition shadow-sm flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                            </path>
+                        </svg>
+                        Ver Dashboard del Cliente
+                    </button>
+                    <div class="flex justify-center mt-2">
+                        <button id="btnDeleteUser" onclick="deleteSelectedUser()"
+                            class="text-red-500 text-xs font-bold hover:text-red-700 transition underline">
+                            ELIMINAR USUARIO
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ==========================================
+         MODALES
+         ========================================== -->
+
+    <!-- Modal Crear Usuario -->
+    <div id="modalCreateUser" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onclick="document.getElementById('modalCreateUser').classList.add('hidden')"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl flex flex-col z-10 animate-fade-in">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <h3 class="text-lg font-bold">Crear Nuevo Usuario</h3>
+                <button type="button" onclick="document.getElementById('modalCreateUser').classList.add('hidden')"
+                    class="text-gray-400 hover:text-black transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="formCreateUser" class="p-6" onsubmit="window.registerNewUser(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="text" id="createFirstName" required placeholder="Nombre(s)"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                            <input type="text" id="createLastName" required placeholder="Apellidos"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                        <input type="email" id="createEmail" required placeholder="usuario@email.com"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono (10 dígitos)</label>
+                        <input type="text" id="createPhone" required pattern="[0-9]{10}" placeholder="1234567890" maxlength="10"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                        <input type="password" id="createPassword" required placeholder="••••••••" minlength="6"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                        <select id="createRole"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
+                            <option value="user" selected>Usuario</option>
+                            <option value="subadmin">Subadmin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button"
+                        onclick="document.getElementById('modalCreateUser').classList.add('hidden')"
+                        class="px-5 py-2.5 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition">Cancelar</button>
+                    <button type="submit"
+                        class="bg-black text-white px-6 py-2.5 rounded-lg font-bold hover:bg-gray-800 transition shadow-sm">Crear Usuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Confirmar Eliminación -->
+    <div id="modalDeleteUser" class="fixed inset-0 z-[60] hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modalDeleteUser').classList.add('hidden')"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white rounded-2xl shadow-xl flex flex-col p-6 text-center z-10 animate-fade-in">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Eliminar Usuario</h3>
+            <p class="text-sm text-gray-500 mb-6">¿Estás seguro que deseas eliminar a este usuario permanentemente? Esta acción no se puede deshacer y borrará todo su historial financiero.</p>
+            <div class="flex justify-between gap-3 w-full">
+                <button onclick="document.getElementById('modalDeleteUser').classList.add('hidden')" class="w-1/2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition">Cancelar</button>
+                <button onclick="confirmDeleteUser()" class="w-1/2 px-4 py-2 bg-red-600 rounded-lg text-white font-bold hover:bg-red-700 transition shadow-sm">Sí, eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Registrar Pago -->
+    <div id="modalRegisterPayment" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onclick="document.getElementById('modalRegisterPayment').classList.add('hidden')"></div>
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <h3 class="text-lg font-bold">Registrar Transacción (API)</h3>
+                <button onclick="document.getElementById('modalRegisterPayment').classList.add('hidden')"
+                    class="text-gray-400 hover:text-black transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="formRegisterPayment" class="p-6">
+                <!-- Predictive Search Input -->
+                <div class="mb-4 relative">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Buscar Beneficiario</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </span>
+                        <input type="text" id="predictiveSearchInput" autocomplete="off"
+                            placeholder="Escribe el nombre o email..."
+                            class="w-full border border-gray-300 rounded-lg pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent">
+                    </div>
+                    <!-- Dropdown Resutados Predicativos -->
+                    <div id="predictiveResults"
+                        class="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg hidden">
+                        <ul class="py-1 text-sm text-gray-700" id="predictiveResultsList">
+                            <!-- Inyectado por JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Campos Ocultos para enviar a la BD -->
+                <input type="hidden" id="selectedUserId" name="userId">
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Operación</label>
+                        <select id="paymentType"
+                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent bg-white">
+                            <option value="deposit">Abono (Depósito/Inversión)</option>
+                            <option value="withdrawal">Cargo (Retiro)</option>
+                            <option value="yield">Rendimiento Generado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Monto (MXN)</label>
+                        <div class="relative">
+                            <span
+                                class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-medium">$</span>
+                            <input type="number" id="paymentAmount" step="0.01" placeholder="0.00"
+                                class="w-full border border-gray-300 rounded-lg pl-8 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Concepto o Descripción</label>
+                    <input type="text" id="paymentDescription" placeholder="Ej. Depósito Inicial STP"
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent">
+                </div>
+
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button"
+                        onclick="document.getElementById('modalRegisterPayment').classList.add('hidden')"
+                        class="px-5 py-2.5 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition">Cancelar</button>
+                    <button type="submit"
+                        class="bg-fintech-primary text-white px-6 py-2.5 rounded-lg font-bold hover:bg-fintech-hover transition shadow-sm">Aplicar
+                        Transacción</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/shield.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
