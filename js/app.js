@@ -285,7 +285,7 @@ async function loadDashboardData() {
                             <td class="px-6 py-4 font-medium ${returnClass}">${user.annualReturnRate}%</td>
                             <td class="px-6 py-4 font-bold text-fintech-textMain">${formatter.format(user.totalBalance)}</td>
                             <td class="px-6 py-4"><span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs">${riskStr}</span></td>
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 sticky right-0 bg-white z-10 shadow-[-4px_0_10px_rgba(0,0,0,0.05)]">
                                 <div class="flex items-center justify-end gap-2 transition-opacity">
                                     <button onclick="triggerImpersonation(event, ${user.id}, '${user.firstName} ${user.lastName}')" title="Ver Dashboard de Cliente" class="text-fintech-primary p-2 bg-gray-50 hover:bg-fintech-primary hover:text-white rounded border border-transparent hover:border-fintech-primary transition">
                                         <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -664,7 +664,7 @@ window.loginAsUser = function() {
 window.exitImpersonationMode = function() {
     localStorage.removeItem('impersonatingId');
     localStorage.removeItem('impersonatingName');
-    document.body.style.paddingTop = '0'; // Clean layout padding
+    // document.body.style.paddingTop = '0'; // Clean layout padding
     window.location.href = 'Admin.html#users';
 };
 
@@ -984,6 +984,11 @@ function updateSidebarUserInfo() {
 
 // --- SPA NAVIGATION ---
 window.switchView = function (viewName) {
+    const overlay = document.getElementById('sidebarOverlay');
+    if (overlay && !overlay.classList.contains('hidden') && typeof toggleSidebar === 'function') {
+        toggleSidebar();
+    }
+
     const dashboardView = document.getElementById('dashboardView');
     const allTxView = document.getElementById('allTransactionsView');
     const settingsView = document.getElementById('settingsView');
@@ -1151,25 +1156,33 @@ function initImpersonationMode() {
 
                 // Inyección Dinámica del Banner Solicitado
                 const bannerHtml = `
-                    <div id="dynamicImpersonationBanner" class="fixed top-0 left-0 w-full bg-red-600 text-white z-[9999] p-3 flex justify-between items-center shadow-lg h-14">
+                    <div id="dynamicImpersonationBanner" class="block w-full bg-red-600 text-white z-[9999] p-3 flex justify-between items-center shadow-lg h-14">
                         <div class="flex items-center gap-3">
                             <span class="inline-flex items-center h-2.5 w-2.5 rounded-full bg-white animate-pulse"></span>
-                            <span class="font-bold text-sm md:text-base">MODO VISTA DE USUARIO: Estás viendo el panel de ${impersonatingName}</span>
+                            <p class="text-xs md:text-sm">MODO VISTA: <span class="font-bold">${impersonatingName}</span></p>
                         </div>
-                        <button onclick="exitImpersonationMode()" class="bg-white text-red-600 px-4 py-1.5 rounded font-bold hover:bg-gray-100 transition shadow border border-red-200 text-sm">
-                            Cerrar Vista y Volver a Admin
+                        <button onclick="exitImpersonationMode()" class="bg-white text-red-600 px-3 py-1.5 rounded font-bold hover:bg-gray-100 transition shadow border border-red-200 text-xs md:text-sm">
+                            CERRAR VISTA
                         </button>
                     </div>
                 `;
                 document.body.insertAdjacentHTML('afterbegin', bannerHtml);
-                document.body.style.paddingTop = '3.5rem'; // Fix overlap
+                // document.body.style.paddingTop = '3.5rem'; // Eliminado en Asalto 6.7
                 
                 const sidebarNameEl = document.getElementById('sidebarUserName');
                 const greetingEl = document.getElementById('userGreeting');
+                const profileMainTitle = document.getElementById('profileMainTitle');
                 
                 if (sidebarNameEl) sidebarNameEl.innerText = impersonatingName;
                 if (greetingEl) greetingEl.innerText = `Hola, ${impersonatingName}`;
+                if (profileMainTitle) profileMainTitle.innerText = `Portafolio de ${impersonatingName}`;
                 
+                // ASALTO 6.4: Ocultar botones de inversión y retiro
+                const btnInvest = document.getElementById('btnInvest');
+                const btnWithdraw = document.getElementById('btnWithdraw');
+                if (btnInvest) btnInvest.classList.add('hidden');
+                if (btnWithdraw) btnWithdraw.classList.add('hidden');
+
                 showToast('Modo Suplantación Activo', 'success');
             }
         } catch(e) {
@@ -1352,8 +1365,13 @@ window.loadRecentTransactions = async function() {
             const tr = document.createElement('tr');
             tr.className = 'hover:bg-gray-50 transition border-b border-gray-100 last:border-0';
             const dateStr = new Date(tx.date).toLocaleDateString('es-MX', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
+            let displayUser = tx.user || tx.userId;
+            if (window.adminUsersDataMap && window.adminUsersDataMap[tx.userId]) {
+                const mapUser = window.adminUsersDataMap[tx.userId];
+                displayUser = `${mapUser.firstName} ${mapUser.lastName}`.trim();
+            }
             tr.innerHTML = `
-                <td class="px-4 py-3 font-bold text-black">${tx.user || tx.userId}</td>
+                <td class="px-4 py-3 font-bold text-black">${displayUser}</td>
                 <td class="px-4 py-3 text-gray-500">${dateStr}</td>
                 <td class="px-4 py-3 text-gray-600">${typeStr}</td>
                 <td class="px-4 py-3 font-bold text-right ${amountColor}">${formatter.format(tx.amount)}</td>
@@ -1416,9 +1434,14 @@ window.loadGlobalTransactions = async function() {
             const tr = document.createElement('tr');
             tr.className = 'hover:bg-blue-50/50 transition border-b border-gray-100 last:border-0';
             const dateStr = new Date(tx.date).toLocaleDateString('es-MX', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit'});
+            let displayUser = tx.user || tx.userId;
+            if (window.adminUsersDataMap && window.adminUsersDataMap[tx.userId]) {
+                const mapUser = window.adminUsersDataMap[tx.userId];
+                displayUser = `${mapUser.firstName} ${mapUser.lastName}`.trim();
+            }
             tr.innerHTML = `
                 <td class="px-6 py-4 text-gray-500 text-xs font-mono">${tx.id || 'N/A'}</td>
-                <td class="px-6 py-4 font-bold text-black">${tx.user || tx.userId}</td>
+                <td class="px-6 py-4 font-bold text-black">${displayUser}</td>
                 <td class="px-6 py-4 text-gray-500">${dateStr}</td>
                 <td class="px-6 py-4 text-gray-600">${typeStr}</td>
                 <td class="px-6 py-4 font-bold text-right ${amountColor}">${formatter.format(tx.amount)}</td>
@@ -1430,3 +1453,43 @@ window.loadGlobalTransactions = async function() {
         showToast('Error cargando historial de servidor', 'danger');
     }
 };
+
+// --- ASALTO 6.4: AUTOCLOSE SIDEBAR MÓVIL ---
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('dashboardSidebar');
+    if (sidebar) {
+        sidebar.addEventListener('click', (e) => {
+            if (window.innerWidth < 768) {
+                const target = e.target.closest('a') || e.target.closest('button');
+                if (target && typeof toggleSidebar === 'function') {
+                    const overlay = document.getElementById('sidebarOverlay');
+                    if(overlay && !overlay.classList.contains('hidden')) {
+                        toggleSidebar();
+                    }
+                }
+            }
+        });
+    }
+});
+
+// --- ASALTO 6.4: BUSCADOR DINÁMICO TABLA DE USUARIOS ---
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('adminTableSearch');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', (e) => {
+            const query = e.target.value.toLowerCase();
+            const tbody = document.getElementById('adminUsersTableBody');
+            if (!tbody) return;
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                if (row.children.length === 1 && row.children[0].colSpan > 1) return;
+                const text = row.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+});

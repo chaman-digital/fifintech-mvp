@@ -49,9 +49,34 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 
-<body class="bg-fintech-bg font-sans text-fintech-textMain flex h-screen overflow-hidden relative">
+<body class="bg-fintech-bg font-sans text-fintech-textMain flex flex-col md:flex-row relative">
 
-    <nav class="glass-nav w-64 h-full flex flex-col justify-between py-6 px-4 shadow-sm z-20 flex-shrink-0">
+    <!-- HEADER MÓVIL FIJO (Asalto 6.6 -> 6.7 Sticky) -->
+    <header class="md:hidden sticky top-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-sm px-4 py-3 flex items-center justify-between border-b border-gray-100">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="text-gray-600 hover:text-black focus:outline-none flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <span class="font-bold text-gray-800 text-lg">Fintech MVP</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button class="text-gray-500 hover:text-black focus:outline-none">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                    </path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Overlay del Sidebar -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+    <nav id="dashboardSidebar" class="glass-nav w-64 h-full flex flex-col justify-between py-6 px-4 shadow-sm z-50 flex-shrink-0 fixed md:relative -translate-x-full md:translate-x-0 transition-transform duration-300 left-0 top-0">
         <div>
             <div class="flex items-center mb-8 px-3 cursor-pointer">
                 <img src="assets/logos/transcoin-logo-dark-gradient.svg" alt="Transcoin Logo"
@@ -73,7 +98,7 @@
                     <p class="px-3 text-xs font-semibold text-fintech-textSec uppercase tracking-wider">Operaciones</p>
                 </div>
                 <a href="#" id="navTransactions" onclick="switchView('transactions')"
-                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    class="flex items-center gap-3 px-3 py-2 text-slate-800 hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
@@ -82,7 +107,7 @@
                     Todos los Movimientos
                 </a>
                 <a href="#" id="navRefunds" onclick="switchView('refunds')"
-                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    class="flex items-center gap-3 px-3 py-2 text-slate-800 hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z">
@@ -96,7 +121,7 @@
                 </div>
 
                 <a href="#" id="menuMisTarjetas"
-                    class="hidden flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    class="hidden flex items-center gap-3 px-3 py-2 text-slate-800 hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
@@ -105,7 +130,7 @@
                     Mis Tarjetas
                 </a>
                 <a href="#" id="navSettings" onclick="switchView('settings')"
-                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
+                    class="flex items-center gap-3 px-3 py-2 text-slate-800 hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
@@ -140,29 +165,22 @@
         </div>
     </nav>
 
-    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-32 relative w-full max-w-full">
         <div id="dashboardView">
-            <header class="flex justify-between items-center mb-6">
-                <div class="relative w-64 lg:w-96">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                    </span>
-                    <input type="text" placeholder="Search..."
-                        class="w-full bg-white border border-gray-200 text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent shadow-sm hidden md:block">
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <button
-                        class="bg-white border border-gray-200 p-2 rounded-lg text-gray-500 hover:text-black shadow-sm transition-colors shadow-sm">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
-                            </path>
-                        </svg>
-                    </button>
+            <header class="hidden md:flex items-center gap-4 mb-6">
+                <!-- Espacio vacío donde iba la hamburguesa en móvil -->
+                <div class="flex-1 flex justify-between items-center w-full">
+                    <div class="flex-1"></div>
+                    <div class="flex items-center gap-4">
+                        <button
+                            class="bg-white border border-gray-200 p-2 rounded-lg text-gray-500 hover:text-black shadow-sm transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                                </path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </header>
 
@@ -174,17 +192,17 @@
                     </div>
 
                     <div>
-                        <h1 class="text-2xl md:text-3xl font-bold mb-2">Transaction Monitoring</h1>
+                        <h1 id="profileMainTitle" class="text-2xl md:text-3xl font-bold mb-2">Transaction Monitoring</h1>
                         <p class="text-sm md:text-base text-gray-300">Monitor and manage your portfolio metrics in
                             real-time.</p>
                     </div>
 
                     <div class="mt-4 md:mt-0 flex gap-3 z-10">
-                        <button onclick="document.getElementById('modalInvest').classList.remove('hidden')"
+                        <button id="btnInvest" onclick="document.getElementById('modalInvest').classList.remove('hidden')"
                             class="bg-white text-black font-semibold px-5 py-2.5 rounded-lg text-sm hover:bg-gray-100 transition shadow-sm">
                             Invertir
                         </button>
-                        <button onclick="document.getElementById('modalWithdrawal').classList.remove('hidden')"
+                        <button id="btnWithdraw" onclick="document.getElementById('modalWithdrawal').classList.remove('hidden')"
                             class="bg-white text-black border border-gray-200 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition w-full md:w-auto shadow-sm">
                             Retirar
                         </button>
@@ -265,7 +283,7 @@
                     </button>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto w-full">
                     <table class="w-full text-left text-sm whitespace-nowrap">
                         <thead class="bg-gray-50 text-fintech-textSec">
                             <tr>
@@ -302,7 +320,7 @@
                         Exportar CSV
                     </button>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto w-full">
                     <table class="w-full text-left text-sm whitespace-nowrap">
                         <thead class="bg-gray-50 text-fintech-textSec">
                             <tr>
@@ -351,12 +369,12 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
                                 <input type="text" id="settingFirstName" readonly value="Cargando..."
-                                    class="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-3 font-bold text-black focus:outline-none cursor-not-allowed">
+                                    class="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-3 font-bold text-black focus:outline-none cursor-not-allowed text-base">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
                                 <input type="text" id="settingLastName" readonly value="Cargando..."
-                                    class="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-3 font-bold text-black focus:outline-none cursor-not-allowed">
+                                    class="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-3 font-bold text-black focus:outline-none cursor-not-allowed text-base">
                             </div>
                         </div>
 
@@ -364,12 +382,12 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                                 <input type="email" id="settingEmail" readonly value="Cargando..."
-                                    class="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-3 font-bold text-black focus:outline-none cursor-not-allowed">
+                                    class="w-full border border-gray-200 bg-gray-100 rounded-lg px-4 py-3 font-bold text-black focus:outline-none cursor-not-allowed text-base">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono Móvil</label>
                                 <input type="tel" id="settingPhone" name="phone" placeholder="+52 000 000 0000"
-                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent font-medium text-gray-900 bg-white shadow-sm">
+                                    class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent font-medium text-gray-900 bg-white shadow-sm text-base">
                             </div>
                         </div>
                     </div>
@@ -440,7 +458,7 @@
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm shadow-xl"
             onclick="document.getElementById('modalInvest').classList.add('hidden')"></div>
         <div
-            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-lg mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                 <h3 class="text-xl font-bold">Nueva Inversión</h3>
                 <button onclick="document.getElementById('modalInvest').classList.add('hidden')"
@@ -498,7 +516,7 @@
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm shadow-xl transition-opacity"
             onclick="closeWithdrawalModal()"></div>
         <div
-            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-lg mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                 <h3 class="text-xl font-bold text-gray-800">Transferencia SPEI</h3>
                 <button id="closeWithdrawalBtn" onclick="closeWithdrawalModal()"
@@ -521,7 +539,7 @@
                                 class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-bold">$</span>
                             <input type="number" step="0.01" min="100" name="withdrawalAmount" placeholder="0.00"
                                 required
-                                class="w-full border border-gray-300 rounded-lg pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent font-medium">
+                                class="w-full max-w-full block box-border border border-gray-300 rounded-lg pl-8 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent font-medium text-base">
                         </div>
                     </div>
                     <div class="mb-6">
@@ -529,7 +547,7 @@
                             dígitos)</label>
                         <input type="text" maxlength="18" minlength="18" pattern="[0-9]{18}" name="withdrawalClabe"
                             placeholder="000000000000000000" required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent font-mono tracking-widest text-sm text-gray-800 placeholder-gray-300">
+                            class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent font-mono tracking-widest text-base text-gray-800 placeholder-gray-300">
                     </div>
                     <div class="flex justify-end pt-4">
                         <button type="submit"
@@ -568,6 +586,14 @@
 
     <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
 
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if(sidebar) sidebar.classList.toggle('-translate-x-full');
+            if(overlay) overlay.classList.toggle('hidden');
+        }
+    </script>
     <script src="js/shield.js"></script>
     <script src="js/api.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

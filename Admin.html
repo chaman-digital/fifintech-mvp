@@ -51,7 +51,20 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 
-<body class="bg-fintech-bg font-sans text-fintech-textMain flex h-screen overflow-hidden">
+<body class="bg-fintech-bg font-sans text-fintech-textMain flex flex-col md:flex-row relative">
+
+    <!-- HEADER MÓVIL FIJO (Asalto 6.6 -> 6.7 Sticky) -->
+    <header class="md:hidden sticky top-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-sm px-4 py-3 flex items-center justify-between border-b border-gray-100">
+        <div class="flex items-center gap-3">
+            <button onclick="toggleSidebar()" class="text-gray-600 hover:text-black focus:outline-none flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+            <span class="font-bold text-gray-800 text-lg">Fintech MVP</span>
+        </div>
+    </header>
 
     <!-- Modo Suplantación Banner (Inicialmente Oculto) -->
     <div id="impersonationBanner"
@@ -79,9 +92,12 @@
         </div>
     </div>
 
+    <!-- Overlay del Sidebar -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+
     <!-- Sidebar Navigation -->
-    <nav
-        class="glass-nav w-64 h-full flex flex-col justify-between py-6 px-4 shadow-sm z-20 flex-shrink-0 transition-transform duration-300">
+    <nav id="dashboardSidebar"
+        class="glass-nav w-64 h-full flex flex-col justify-between py-6 px-4 shadow-sm z-50 flex-shrink-0 transition-transform duration-300 fixed md:relative -translate-x-full md:translate-x-0 left-0 top-0">
         <div>
             <!-- Logo -->
             <div class="flex items-center mb-8 px-3 cursor-pointer">
@@ -106,7 +122,7 @@
                 </div>
 
                 <a href="#" id="navAdminUsers"
-                    class="flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors mt-1">
+                    class="flex items-center gap-3 px-3 py-2 text-slate-800 hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors mt-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
@@ -117,7 +133,7 @@
 
                 <!-- Configuración Global (Solo Admin Master) -->
                 <a href="#" id="navAdminSettings"
-                    class="admin-only-feature flex items-center gap-3 px-3 py-2 text-fintech-textSec hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors mt-2 border-t border-gray-100 pt-3">
+                    class="admin-only-feature flex items-center gap-3 px-3 py-2 text-slate-800 hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors mt-2 border-t border-gray-100 pt-3">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
@@ -154,25 +170,9 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative transition-all duration-300" id="mainContent">
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-32 relative transition-all duration-300 w-full max-w-full" id="mainContent">
 
-        <!-- Top App Bar (Barra Superior Global) -->
-        <header class="flex justify-between items-center mb-6">
-            <div class="relative w-64 lg:w-96">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                </span>
-                <input type="text" id="adminGlobalSearch" placeholder="Atajo rápido de usuarios (Ej. Juan)..."
-                    class="w-full bg-white border border-gray-200 text-sm rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent shadow-sm hidden md:block">
-            </div>
-            <div class="flex items-center gap-4">
-                <!-- Funciones Globales Extra -->
-            </div>
-        </header>
+
 
         <!-- ==========================================
              VISTA 1: DASHBOARD GENERAL
@@ -347,25 +347,25 @@
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </span>
-                        <input type="text" id="adminTableSearch" placeholder="Filtro rápido en tabla..."
+                        <input type="text" id="adminTableSearch" autocomplete="off" placeholder="Filtro rápido en tabla..."
                             class="w-full bg-white border border-gray-200 text-sm rounded-md pl-9 pr-3 py-2 focus:outline-none focus:ring-1 focus:ring-fintech-primary">
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto w-full">
                     <table class="w-full text-left text-sm whitespace-nowrap">
                         <thead
-                            class="bg-white border-b border-gray-100 text-xs uppercase text-fintech-textSec tracking-wide">
+                            class="sticky top-0 z-20 bg-gray-50 border-b border-gray-100 text-xs uppercase text-fintech-textSec tracking-wide shadow-sm">
                             <tr>
                                 <th class="px-6 py-4 font-semibold">Inversionista</th>
                                 <th class="px-6 py-4 font-semibold">TNA (%)</th>
                                 <th class="px-6 py-4 font-semibold">Balance Total</th>
                                 <th class="px-6 py-4 font-semibold">Perfil</th>
-                                <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+                                <th class="px-6 py-4 font-semibold text-right sticky right-0 bg-gray-50 z-10 shadow-[-4px_0_10px_rgba(0,0,0,0.05)]">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="adminUsersTableBody" class="divide-y divide-gray-100">
                             <tr>
-                                <td colspan="5" class="px-6 py-8 text-center text-gray-400 animate-pulse">
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-400 animate-pulse">
                                     Cargando directorio de inversionistas...
                                 </td>
                             </tr>
@@ -396,37 +396,37 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Banco Institucional</label>
                             <input type="text" id="settingBank"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base"
                                 placeholder="Ej. STP">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Titular de la Cuenta</label>
                             <input type="text" id="settingAccountHolder"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base"
                                 placeholder="Ej. FINTECH SA DE CV">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Número de Cuenta</label>
                             <input type="text" id="settingAccountNumber"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">CLABE Interbancaria</label>
                             <input type="text" id="settingClabe"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Texto Institucional OXXO /
                                 Físico</label>
                             <textarea id="settingOxxoText" rows="2"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base"
                                 placeholder="Instrucciones para cajeros OXXO..."></textarea>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Link de Pago CoDi
                                 (Opcional)</label>
                             <input type="url" id="settingCodiLink"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base"
                                 placeholder="https://...">
                         </div>
                     </div>
@@ -449,8 +449,7 @@
             <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity opacity-0"
                 id="userPanelOverlay" onclick="closeUserPanel()"></div>
 
-            <!-- Panel lateral derecho Slide-over -->
-            <div class="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col"
+            <div class="fixed inset-y-0 right-0 w-[calc(100vw-3rem)] max-w-md bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col overflow-hidden"
                 id="userPanelContent">
 
                 <!-- Header del Panel -->
@@ -469,7 +468,8 @@
                 </div>
 
                 <!-- Contenido Scrollable -->
-                <div class="flex-1 overflow-y-auto p-6 space-y-8">
+                <div class="flex-1 overflow-y-auto">
+                    <div class="p-6 space-y-8 box-border">
 
                     <!-- SECCIÓN 1: PERFIL Y RIESGO -->
                     <section>
@@ -490,7 +490,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Perfil de Riesgo</label>
                                 <select id="panelRiskProfile"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
+                                    class="appearance-none w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
                                     <option value="Conservador">Conservador (Bajo Riesgo)</option>
                                     <option value="Moderado">Moderado (Riesgo Medio)</option>
                                     <option value="Agresivo">Agresivo (Alto Riesgo)</option>
@@ -502,17 +502,17 @@
                                     (%)</label>
                                 <div class="relative">
                                     <input type="number" step="0.01" id="panelAnnualReturnRate" placeholder="Ej. 12.5"
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary pr-8">
+                                        class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-fintech-primary pr-8">
                                     <span class="absolute right-3 top-2.5 text-gray-400 font-medium">%</span>
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Periodo
                                         Inversión</label>
                                     <select id="panelInvestmentPeriod"
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
+                                        class="appearance-none w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
                                         <option value="Mensual">Mensual</option>
                                         <option value="Quincenal">Quincenal</option>
                                     </select>
@@ -520,7 +520,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Próxima Fecha</label>
                                     <input type="date" id="panelNextInvestmentDate"
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                                        class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-fintech-primary">
                                 </div>
                             </div>
 
@@ -545,11 +545,11 @@
                         </h4>
                         <form id="formDirectTransaction"
                             class="space-y-4 bg-fintech-bg/50 p-5 rounded-xl border border-gray-200 shadow-inner">
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                                     <select id="transType"
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
+                                        class="appearance-none w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
                                         <option value="deposit">Abono (+)</option>
                                         <option value="withdrawal">Cargo (-)</option>
                                         <option value="yield">Rendimiento (+)</option>
@@ -561,7 +561,7 @@
                                         <span
                                             class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-medium text-sm">$</span>
                                         <input type="number" step="0.01" id="transAmount" placeholder="0.00"
-                                            class="w-full border border-gray-300 rounded-lg pl-7 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                                            class="w-full max-w-full block box-border border border-gray-300 rounded-lg pl-7 pr-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-fintech-primary">
                                     </div>
                                 </div>
                             </div>
@@ -570,13 +570,13 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Num. Autorización /
                                     Referencia</label>
                                 <input type="text" id="transAuthNumber" placeholder="Ej. 123456789"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary uppercase font-mono">
+                                    class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-fintech-primary uppercase font-mono">
                             </div>
 
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Comprobante</label>
                                 <input type="date" id="transCustomDate"
-                                    class="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                                    class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-fintech-primary">
                             </div>
 
                             <button type="button" onclick="registerDirectTransaction()"
@@ -586,10 +586,10 @@
                         </form>
                     </section>
 
-                </div>
+                    </div> <!-- End inner body -->
 
-                <!-- Footer del Panel (Acciones Especiales) -->
-                <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col gap-3">
+                    <!-- Footer del Panel (Acciones Especiales) -->
+                    <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col gap-3 w-full box-border">
                     <button onclick="loginAsUser()"
                         class="w-full bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-bold hover:bg-gray-50 transition shadow-sm flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -607,7 +607,7 @@
                             ELIMINAR USUARIO
                         </button>
                     </div>
-                </div>
+                </div> <!-- End global scroll -->
             </div>
         </div>
     </main>
@@ -620,7 +620,7 @@
     <div id="modalCreateUser" class="fixed inset-0 z-[60] hidden">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onclick="document.getElementById('modalCreateUser').classList.add('hidden')"></div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl flex flex-col z-10 animate-fade-in">
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-lg mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col z-10 animate-fade-in">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                 <h3 class="text-lg font-bold">Crear Nuevo Usuario</h3>
                 <button type="button" onclick="document.getElementById('modalCreateUser').classList.add('hidden')"
@@ -635,32 +635,32 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Completo</label>
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <input type="text" id="createFirstName" required placeholder="Nombre(s)"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                                class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base">
                             <input type="text" id="createLastName" required placeholder="Apellidos"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                                class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base">
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
                         <input type="email" id="createEmail" required placeholder="usuario@email.com"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                            class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono (10 dígitos)</label>
                         <input type="text" id="createPhone" required pattern="[0-9]{10}" placeholder="1234567890" maxlength="10"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                            class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
                         <input type="password" id="createPassword" required placeholder="••••••••" minlength="6"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary">
+                            class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary text-base">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
                         <select id="createRole"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white">
+                            class="appearance-none w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary bg-white text-base">
                             <option value="user" selected>Usuario</option>
                             <option value="subadmin">Subadmin</option>
                         </select>
@@ -682,7 +682,7 @@
     <div id="modalDeleteUser" class="fixed inset-0 z-[60] hidden">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onclick="document.getElementById('modalDeleteUser').classList.add('hidden')"></div>
-        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white rounded-2xl shadow-xl flex flex-col p-6 text-center z-10 animate-fade-in">
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-sm mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col p-6 text-center z-10 animate-fade-in">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
                 <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -702,7 +702,7 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onclick="document.getElementById('modalRegisterPayment').classList.add('hidden')"></div>
         <div
-            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl flex flex-col">
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-lg mx-auto bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                 <h3 class="text-lg font-bold">Registrar Transacción (API)</h3>
                 <button onclick="document.getElementById('modalRegisterPayment').classList.add('hidden')"
@@ -727,7 +727,7 @@
                         </span>
                         <input type="text" id="predictiveSearchInput" autocomplete="off"
                             placeholder="Escribe el nombre o email..."
-                            class="w-full border border-gray-300 rounded-lg pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent">
+                            class="w-full max-w-full block box-border border border-gray-300 rounded-lg pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent text-base">
                     </div>
                     <!-- Dropdown Resutados Predicativos -->
                     <div id="predictiveResults"
@@ -741,11 +741,11 @@
                 <!-- Campos Ocultos para enviar a la BD -->
                 <input type="hidden" id="selectedUserId" name="userId">
 
-                <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Operación</label>
                         <select id="paymentType"
-                            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent bg-white">
+                            class="appearance-none w-full max-w-full block box-border border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent bg-white text-base">
                             <option value="deposit">Abono (Depósito/Inversión)</option>
                             <option value="withdrawal">Cargo (Retiro)</option>
                             <option value="yield">Rendimiento Generado</option>
@@ -757,7 +757,7 @@
                             <span
                                 class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500 font-medium">$</span>
                             <input type="number" id="paymentAmount" step="0.01" placeholder="0.00"
-                                class="w-full border border-gray-300 rounded-lg pl-8 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent">
+                                class="w-full max-w-full block box-border border border-gray-300 rounded-lg pl-8 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent text-base">
                         </div>
                     </div>
                 </div>
@@ -765,7 +765,7 @@
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Concepto o Descripción</label>
                     <input type="text" id="paymentDescription" placeholder="Ej. Depósito Inicial STP"
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent">
+                        class="w-full max-w-full block box-border border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-fintech-primary focus:border-transparent text-base">
                 </div>
 
                 <div class="mt-6 flex justify-end gap-3">
@@ -781,6 +781,14 @@
     </div>
 
     <!-- Scripts -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('dashboardSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if(sidebar) sidebar.classList.toggle('-translate-x-full');
+            if(overlay) overlay.classList.toggle('hidden');
+        }
+    </script>
     <script src="js/shield.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/api.js"></script>
