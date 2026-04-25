@@ -63,7 +63,6 @@ body {
     border-radius: 1rem;
     filter: blur(8px);
     opacity: 0.8;
-    transform: scale(0.98) translateY(4px);
 }
 
 /* Estilos base para botones abstractos (Neon/Glow) */
@@ -75,6 +74,14 @@ body {
 .btn-glow:hover {
     box-shadow: 0 0 30px rgba(130, 10, 209, 0.6);
     transform: translateY(-2px);
+}
+
+.btn-gbm {
+  transition: all 0.3s ease;
+}
+.btn-gbm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
 /* Limitación de altura para Dropdowns (Predictive Search / Autocomplete) */
