@@ -1,4 +1,4 @@
-// api.js - Centralized API calls for ValoraPay MVP
+// api.js - Centralized API calls for Latticework MVP
 
 // ==========================================
 // CONFIGURACIÓN GLOBAL DE ENTORNO (API)

@@ -1,4 +1,4 @@
-// api.js - Centralized API calls for ValoraPay MVP
+// api.js - Centralized API calls for Latticework MVP
 
 // ==========================================
 // CONFIGURACIÓN GLOBAL DE ENTORNO (API)
@@ -27,7 +27,7 @@ function mockResponse(data, delay = 800) {
  */
 const ApiService = {
     // Helper para obtener token (placeholder para manejo real de JWT)
-    getToken: () => localStorage.getItem('valorapay_token') || 'demo_token',
+    getToken: () => localStorage.getItem('latticework_token') || 'demo_token',
 
     // Generic Fetch Wrapper
     async request(endpoint, method = 'GET', body = null) {
