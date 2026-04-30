@@ -4,7 +4,7 @@
 // CONFIGURACIÓN GLOBAL DE ENTORNO (API)
 // ==========================================
 // Reemplaza esta variable con la ruta real de tu backend PHP en cPanel
-const API_BASE_URL = 'https://chaman.digital/fifintech/api';
+const API_BASE_URL = 'https://latticework.mx/api';
 
 // Cambia a FALSE para desactivar el Mock y consumir el backend PHP real
 const DEMO_MODE = false;

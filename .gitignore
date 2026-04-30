@@ -1,0 +1,7 @@
+produccion_credenciales.md
+credentials.json
+token.json
+.env
+mcp_server/.env
+__pycache__/
+mcp_server/node_modules/

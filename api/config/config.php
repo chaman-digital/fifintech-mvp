@@ -3,13 +3,13 @@
 // Archivo central de configuración para el MVP Fintech.
 
 // Base URL del proyecto (usada para generación de enlaces y QR)
-define('BASE_URL', 'https://chaman.digital/fifintech');
+define('BASE_URL', 'https://latticework.mx');
 
 // Configuración de la Base de Datos
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'chamand3_fintech');
-define('DB_USER', 'chamand3_muninn');
-define('DB_PASS', 'L@n37FliX.mX');
+define('DB_NAME', 'latt1cew_fintech');
+define('DB_USER', 'latt1cew_admin');
+define('DB_PASS', 'Latt!ceW0rk.2026_MX#');
 
 // Configuración de JWT
 define('JWT_SECRET', 'ChamanD1g1tal_Fintech_88xYZ');
