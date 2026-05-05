@@ -11,7 +11,7 @@ class QRCodeGenerator {
     
     public static function generateBase64($data) {
         $svg = '<?xml version="1.0" encoding="utf-8"?>
-<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 100 100" xmlns="https://www.w3.org/2000/svg">
   <rect width="100" height="100" fill="white"/>
   <text x="50" y="50" font-family="Arial" font-size="10" text-anchor="middle" fill="black">QR Code</text>
   <text x="50" y="65" font-family="Arial" font-size="8" text-anchor="middle" fill="black">' . htmlspecialchars($data) . '</text>
