@@ -21,14 +21,13 @@ $db = $database->getConnection();
 
 try {
     // JOIN con la tabla users para obtener el nombre completo
-    // Si customDate existe se usará como fecha principal de la transacción, si no, se usará el 'date' por defecto.
     $query = "
         SELECT 
             t.id AS transactionId,
             t.type,
             t.amount,
             t.status,
-            COALESCE(t.customDate, t.date) AS transactionDate,
+            t.date AS transactionDate,
             u.id AS userId,
             u.firstName,
             u.lastName

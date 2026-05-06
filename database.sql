@@ -81,7 +81,8 @@ CREATE TABLE `transactions` (
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `type` enum('deposit','withdrawal') NOT NULL,
   `amount` decimal(15,2) NOT NULL,
-  `status` enum('pending','completed') NOT NULL DEFAULT 'pending',
+  `status` enum('pending','completed','rejected') NOT NULL DEFAULT 'pending',
+  `details` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `fk_transaction_user` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

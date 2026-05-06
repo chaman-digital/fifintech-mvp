@@ -26,7 +26,7 @@ if (isset($_GET['userId']) && !empty($_GET['userId'])) {
     $stmtRole->execute();
     $roleRow = $stmtRole->fetch(PDO::FETCH_ASSOC);
     
-    if ($roleRow && in_array($roleRow['role'], ['superadmin', 'subadmin'])) {
+    if ($roleRow && in_array($roleRow['role'], ['superadmin', 'subadmin', 'admin'])) {
         $userId = intval($_GET['userId']); // Suplantar
     }
 }
@@ -35,22 +35,23 @@ $database = new Database();
 $db = $database->getConnection();
 
 try {
-    // 1. Obtener la información del usuario (riskProfile, annualReturnRate, nextInvestmentDate)
-    $queryUser = "SELECT riskProfile, annualReturnRate, nextInvestmentDate FROM users WHERE id = :userId LIMIT 1";
+    // 1. Obtener la información del usuario desde user_profiles.data JSON
+    $queryUser = "SELECT data FROM user_profiles WHERE userId = :userId LIMIT 1";
     $stmtUser = $db->prepare($queryUser);
     $stmtUser->bindParam(':userId', $userId, PDO::PARAM_INT);
     $stmtUser->execute();
     
     if ($stmtUser->rowCount() === 0) {
-        http_response_code(404);
-        echo json_encode(["status" => "error", "message" => "Usuario no encontrado"]);
-        exit;
+        $riskProfile = "Moderate";
+        $annualReturnRate = 0.00;
+        $nextInvestmentDate = null;
+    } else {
+        $rowUser = $stmtUser->fetch(PDO::FETCH_ASSOC);
+        $dataProfile = json_decode($rowUser['data'], true);
+        $riskProfile = (isset($dataProfile['riskProfile']) && $dataProfile['riskProfile']) ? $dataProfile['riskProfile'] : "Moderate";
+        $annualReturnRate = isset($dataProfile['annualReturnRate']) ? floatval($dataProfile['annualReturnRate']) : 0.00;
+        $nextInvestmentDate = isset($dataProfile['nextInvestmentDate']) ? $dataProfile['nextInvestmentDate'] : null;
     }
-    
-    $rowUser = $stmtUser->fetch(PDO::FETCH_ASSOC);
-    $riskProfile = $rowUser['riskProfile'] ? $rowUser['riskProfile'] : "Moderate";
-    $annualReturnRate = $rowUser['annualReturnRate'] !== null ? floatval($rowUser['annualReturnRate']) : 0.00;
-    $nextInvestmentDate = $rowUser['nextInvestmentDate'];
 
     // 2. Calcular los balances reales desde la tabla transactions
     $queryBalance = "

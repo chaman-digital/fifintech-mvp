@@ -23,7 +23,7 @@ Réplica de la vista de monitoreo:
 *   **Tarjetas Dinámicas**: Cuatro tarjetas preparadas para inyectar datos de la API (Balance, ROI, Depósitos, Riesgo).
 *   **Interacciones (JS)**:
     *   **Invertir**: Lanza el modal (`#modalInvest`) que contiene un sistema funcional de 3 pestañas (Transferencia, OXXO, CoDi).
-    *   **Retirar**: Invoca la función `showToast()` mostrando una alerta roja de "Mantenimiento Temporal".
+    *   **Retirar**: Invoca un flujo completo (Modal `#modalWithdrawal`) que permite solicitar retiros validando que el monto no exceda el 75% del capital disponible, enviando una carga JSON detallada (banco, clabe, titular) al servidor real de cPanel.
     *   **Mis Tarjetas**: Un formulario completo renderizado dentro del DOM pero oculto (para activarlo: botón "Mis Tarjetas" en el navbar, inyectable vía JS si se desea mostrar la ruta).
 
 ### 4. Dashboard Administrador (`Admin.html`)
@@ -33,6 +33,10 @@ Diseñado para la gerencia operativa:
     *   El requerimiento pedía cargar `Profile.html` dentro del entorno Admin, restringiendo acciones y añadiendo una barra superior.
     *   **Solución Arquitectónica**: Al hacer clic en un usuario, se despliega una barra sticky roja de advertencia, se inyecta un `<iframe>` de la ruta `Profile.html`.
     *   Se dispuso sobre el Iframe un *overlay invisible* en el HTML del Admin que anula todos los clics (pointer-events-none + z-index bloqueador en una app real), logrando la "vista de solo lectura" estéticamente y mitigando ejecución errática de frontend. (El backend debe complementar esta restricción).
+*   **Gestión de Retiros (SuperAdmin)**:
+    *   Nuevo tab que consume en tiempo real (evitando caché de Safari mediante `no-store`) el listado de transacciones tipo 'withdrawal'.
+    *   Permite aprobar o rechazar solicitudes con acciones asíncronas reflejadas visualmente con *badges* (Pendiente, Completado, Rechazado).
+    *   Diseñado con lógica "retro-compatible" para desplegar retiros antiguos que no poseían metadata bancaria como "No especificado".
 
 ### 5. Lógica de API (Mocking + Fetch)
 *   **`js/api.js`**: Cuenta con un Wrapper `fetch` unificado. Actualmente, configuré `DEMO_MODE=true` en el script, lo cual devuelve las promesas "Mocks" basadas en la documentación de `api-endpoints.md` (Balance matemático, Búsqueda). Cambiar este booleano a falso activaría las peticiones reales a `https://tudominio.com/api`.

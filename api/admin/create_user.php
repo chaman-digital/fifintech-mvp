@@ -78,23 +78,20 @@ try {
     $publicUrl = rtrim(BASE_URL, '/') . "/PublicProfile?userId=" . $userId;
     $qrCodeData = QRCodeGenerator::generateBase64($publicUrl);
     
-    // Update user row directly with new fields
     $annualReturnRate = isset($data->annualReturnRate) ? floatval($data->annualReturnRate) : 0.0;
     $riskProfile = isset($data->riskProfile) ? htmlspecialchars(strip_tags($data->riskProfile), ENT_QUOTES, 'UTF-8') : 'Moderado';
     $investmentPeriod = isset($data->investmentPeriod) ? htmlspecialchars(strip_tags($data->investmentPeriod), ENT_QUOTES, 'UTF-8') : 'Mensual';
     $nextInvestmentDate = isset($data->nextInvestmentDate) && !empty($data->nextInvestmentDate) ? htmlspecialchars(strip_tags($data->nextInvestmentDate), ENT_QUOTES, 'UTF-8') : null;
 
-    $queryUpdateUser = "UPDATE users SET annualReturnRate = :annualReturnRate, riskProfile = :riskProfile, investmentPeriod = :investmentPeriod, nextInvestmentDate = :nextInvestmentDate WHERE id = :userId";
-    $stmtUpdateUser = $db->prepare($queryUpdateUser);
-    $stmtUpdateUser->bindParam(":annualReturnRate", $annualReturnRate);
-    $stmtUpdateUser->bindParam(":riskProfile", $riskProfile);
-    $stmtUpdateUser->bindParam(":investmentPeriod", $investmentPeriod);
-    $stmtUpdateUser->bindParam(":nextInvestmentDate", $nextInvestmentDate);
-    $stmtUpdateUser->bindParam(":userId", $userId);
-    $stmtUpdateUser->execute();
-    
-    // UserProfile still needed for the JSON dynamics and public URL
-    $profileData = [];
+    $profileData = [
+        "annualReturnRate" => $annualReturnRate,
+        "riskProfile" => $riskProfile,
+        "investmentPeriod" => $investmentPeriod,
+        "nextInvestmentDate" => $nextInvestmentDate,
+        "clabe" => "",
+        "bankName" => "",
+        "beneficiaryName" => ""
+    ];
     $profileDataJson = json_encode($profileData);
     
     $queryProfile = "INSERT INTO user_profiles (userId, publicUrl, data) VALUES (:userId, :publicUrl, :data)";

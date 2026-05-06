@@ -26,7 +26,7 @@ if (isset($_GET['userId']) && !empty($_GET['userId'])) {
     $stmtRole->execute();
     $roleRow = $stmtRole->fetch(PDO::FETCH_ASSOC);
     
-    if ($roleRow && in_array($roleRow['role'], ['superadmin', 'subadmin'])) {
+    if ($roleRow && in_array($roleRow['role'], ['superadmin', 'subadmin', 'admin'])) {
         $userId = intval($_GET['userId']); // Suplantar
     }
 }
@@ -36,7 +36,7 @@ $db = $database->getConnection();
 
 try {
     // Obtener historial completo de transacciones para el usuario activo
-    $query = "SELECT id, type, amount, description, status, date as created_at FROM transactions WHERE userId = :userId ORDER BY date DESC";
+    $query = "SELECT id, type, amount, status, date as created_at FROM transactions WHERE userId = :userId ORDER BY date DESC";
     
     $stmt = $db->prepare($query);
     $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
@@ -49,7 +49,6 @@ try {
             "id" => intval($row['id']),
             "type" => $row['type'],
             "amount" => floatval($row['amount']),
-            "description" => $row['description'] !== null ? htmlspecialchars($row['description'], ENT_QUOTES, 'UTF-8') : "",
             "status" => $row['status'],
             "date" => $row['created_at']
         ];

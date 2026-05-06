@@ -55,13 +55,9 @@ if ($amount <= 0) {
     exit;
 }
 
-$description = isset($data->description) ? htmlspecialchars(strip_tags($data->description), ENT_QUOTES, 'UTF-8') : "Depósito registrado por administración";
-$authNumber = isset($data->authNumber) && !empty($data->authNumber) ? htmlspecialchars(strip_tags($data->authNumber), ENT_QUOTES, 'UTF-8') : null;
-$customDate = isset($data->customDate) && !empty($data->customDate) ? htmlspecialchars(strip_tags($data->customDate), ENT_QUOTES, 'UTF-8') : null;
-
 try {
-    // Check if the user exists and fetch their investment settings
-    $userQuery = "SELECT id, investmentPeriod, nextInvestmentDate FROM users WHERE id = :userId LIMIT 1";
+    // Check if the user exists and fetch their profile data
+    $userQuery = "SELECT data FROM user_profiles WHERE userId = :userId LIMIT 1";
     $userStmt = $db->prepare($userQuery);
     $userStmt->bindParam(":userId", $userId, PDO::PARAM_INT);
     $userStmt->execute();
@@ -70,26 +66,27 @@ try {
         http_response_code(404);
         echo json_encode([
             "status" => "error",
-            "message" => "User not found."
+            "message" => "User profile not found."
         ]);
         exit;
     }
     
     $userRow = $userStmt->fetch(PDO::FETCH_ASSOC);
+    $profileData = json_decode($userRow['data'], true);
+    if (!is_array($profileData)) {
+        $profileData = [];
+    }
 
     // Start transaction to ensure atomicity
     $db->beginTransaction();
 
-    // 1. Insert the transaction
-    $query = "INSERT INTO transactions (userId, type, amount, description, status, authNumber, customDate) VALUES (:userId, :type, :amount, :description, 'completed', :authNumber, :customDate)";
+    // 1. Insert the transaction (no description, no authNumber, no customDate in DB)
+    $query = "INSERT INTO transactions (userId, type, amount, status) VALUES (:userId, :type, :amount, 'completed')";
     
     $stmt = $db->prepare($query);
     $stmt->bindParam(":userId", $userId, PDO::PARAM_INT);
     $stmt->bindParam(":type", $type, PDO::PARAM_STR);
     $stmt->bindParam(":amount", $amount, PDO::PARAM_STR); 
-    $stmt->bindParam(":description", $description, PDO::PARAM_STR);
-    $stmt->bindParam(":authNumber", $authNumber, PDO::PARAM_STR);
-    $stmt->bindParam(":customDate", $customDate, PDO::PARAM_STR);
     
     if (!$stmt->execute()) {
         throw new Exception("Unable to register transaction in DB.");
@@ -106,15 +103,14 @@ try {
         $countStmt->execute();
         $countRow = $countStmt->fetch(PDO::FETCH_ASSOC);
 
-        // If this is the FIRST deposit ever (depositCount will be 1 because we just inserted it in the same transaction)
+        // If this is the FIRST deposit ever
         if (intval($countRow['depositCount']) === 1) {
             
             // Determine base date to calculate from
-            $baseDateStr = $customDate ? $customDate : date('Y-m-d H:i:s');
-            $baseDate = new DateTime($baseDateStr);
+            $baseDate = new DateTime();
             
             // Calculate interval based on user preference
-            $investmentPeriod = $userRow['investmentPeriod']; // 'Mensual' or 'Quincenal'
+            $investmentPeriod = isset($profileData['investmentPeriod']) ? $profileData['investmentPeriod'] : 'Mensual';
             if ($investmentPeriod === 'Quincenal') {
                 $baseDate->modify('+15 days');
             } else {
@@ -124,10 +120,13 @@ try {
             
             $nextInvestmentDate = $baseDate->format('Y-m-d');
             
-            // Update the user
-            $updateUserQuery = "UPDATE users SET nextInvestmentDate = :nextDate WHERE id = :userId";
+            // Update the user profile JSON
+            $profileData['nextInvestmentDate'] = $nextInvestmentDate;
+            $newJson = json_encode($profileData);
+            
+            $updateUserQuery = "UPDATE user_profiles SET data = :data WHERE userId = :userId";
             $updateUserStmt = $db->prepare($updateUserQuery);
-            $updateUserStmt->bindParam(":nextDate", $nextInvestmentDate, PDO::PARAM_STR);
+            $updateUserStmt->bindParam(":data", $newJson, PDO::PARAM_STR);
             $updateUserStmt->bindParam(":userId", $userId, PDO::PARAM_INT);
             
             if (!$updateUserStmt->execute()) {

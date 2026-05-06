@@ -711,7 +711,11 @@
                     Ingresar
                 </button>
             </form>
-            <div class="mt-6 text-center">
+            <div class="mt-6 text-center text-sm text-gray-600">
+                ¿Aún no tienes cuenta? <br>
+                <a href="https://wa.me/525529067289?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." target="_blank" class="text-gbm-black font-bold hover:underline">Contacta a un asesor para abrir una</a>
+            </div>
+            <div class="mt-4 text-center">
                 <button type="button" onclick="document.getElementById('modalLogin').classList.add('hidden')" class="text-sm font-medium text-gray-500 hover:text-black transition">Cancelar</button>
             </div>
         </div>

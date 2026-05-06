@@ -18,13 +18,13 @@ function checkAuth() {
     const token = ApiService.getToken();
 
     if (!token && !isIndexPage) {
-        window.location.replace('index.html');
+        window.location.replace('/');
     } else if (token && isIndexPage) {
         try {
             const userStr = localStorage.getItem('fintech_user');
             if (userStr) {
                 const user = JSON.parse(userStr);
-                window.location.replace((user.role === 'superadmin' || user.role === 'subadmin') ? 'Admin.html' : 'Profile.html');
+                window.location.replace((user.role === 'superadmin' || user.role === 'subadmin' || user.role === 'admin') ? 'Admin.html' : 'Profile.html');
             }
         } catch (e) {
             console.error('Error parseando user session', e);
@@ -35,7 +35,7 @@ function checkAuth() {
 window.logout = function () {
     localStorage.removeItem('fintech_token');
     localStorage.removeItem('fintech_user');
-    window.location.replace('index.html');
+    window.location.replace('/');
 };
 
 function initLogin() {
@@ -63,7 +63,7 @@ function initLogin() {
 
             const data = await ApiService.login(email, password);
 
-            if (data.user && (data.user.role === 'superadmin' || data.user.role === 'subadmin')) {
+            if (data.user && (data.user.role === 'superadmin' || data.user.role === 'subadmin' || data.user.role === 'admin')) {
                 window.location.href = 'Admin.html';
             } else {
                 window.location.href = 'Profile.html';
@@ -109,35 +109,45 @@ function initUI() {
     // --- ADMIN SPA NAVIGATION LÓGICA ---
     const navAdminDash = document.getElementById('navAdminDash');
     const navAdminUsers = document.getElementById('navAdminUsers');
+    const navAdminWithdrawals = document.getElementById('navAdminWithdrawals');
     const navAdminSettings = document.getElementById('navAdminSettings');
     
     if (navAdminDash && navAdminUsers && navAdminSettings) {
         const adminDashView = document.getElementById('adminDashView');
         const adminUsersView = document.getElementById('adminUsersView');
+        const adminWithdrawalsView = document.getElementById('adminWithdrawalsView');
         const adminSettingsView = document.getElementById('adminSettingsView');
 
         const setActiveNav = (activeEl) => {
-            [navAdminDash, navAdminUsers, navAdminSettings].forEach(el => {
-                el.classList.remove('bg-black', 'text-white');
-                el.classList.add('text-fintech-textSec', 'hover:bg-gray-100');
+            [navAdminDash, navAdminUsers, navAdminWithdrawals, navAdminSettings].forEach(el => {
+                if(el) {
+                    el.classList.remove('bg-black', 'text-white');
+                    el.classList.add('text-fintech-textSec', 'hover:bg-gray-100');
+                }
             });
-            activeEl.classList.remove('text-fintech-textSec', 'hover:bg-gray-100');
-            activeEl.classList.add('bg-black', 'text-white');
+            if(activeEl) {
+                activeEl.classList.remove('text-fintech-textSec', 'hover:bg-gray-100');
+                activeEl.classList.add('bg-black', 'text-white');
+            }
         };
 
         const setActiveView = (activeView) => {
-            [adminDashView, adminUsersView, adminSettingsView].forEach(el => el.classList.add('hidden'));
-            activeView.classList.remove('hidden');
+            [adminDashView, adminUsersView, adminWithdrawalsView, adminSettingsView].forEach(el => { if(el) el.classList.add('hidden') });
+            if(activeView) activeView.classList.remove('hidden');
 
             // Inicialización forzada del Dashboard al entrar a la vista
             if (activeView === adminDashView) {
                 if (typeof window.initAdminChart === 'function') window.initAdminChart();
                 if (typeof window.loadRecentTransactions === 'function') window.loadRecentTransactions();
             }
+            if (activeView === adminWithdrawalsView) {
+                if (typeof window.loadAdminWithdrawals === 'function') window.loadAdminWithdrawals();
+            }
         };
 
         navAdminDash.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(navAdminDash); setActiveView(adminDashView); });
         navAdminUsers.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(navAdminUsers); setActiveView(adminUsersView); });
+        if(navAdminWithdrawals) navAdminWithdrawals.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(navAdminWithdrawals); setActiveView(adminWithdrawalsView); });
         navAdminSettings.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(navAdminSettings); setActiveView(adminSettingsView); });
 
         if (window.location.hash === '#users') {
@@ -173,6 +183,14 @@ async function loadDashboardData() {
             else riskEl.className = 'text-xl font-bold text-orange-500';
 
             renderProjectionChart(balance.totalBalance, balance.annualReturnRate);
+
+            const maxWithdrawable = balance.totalBalance * 0.75;
+            const withdrawMaxEl = document.getElementById('withdrawalMaxText');
+            const withdrawInputEl = document.getElementById('withdrawalAmount');
+            if (withdrawMaxEl && withdrawInputEl) {
+                withdrawMaxEl.innerText = `Máximo disponible para retirar (75%): ${formatter.format(maxWithdrawable)}`;
+                withdrawInputEl.setAttribute('max', maxWithdrawable.toFixed(2));
+            }
 
             if (typeof window.checkInvestmentAlert === 'function') {
                 window.checkInvestmentAlert(balance.nextInvestmentDate);
@@ -249,60 +267,70 @@ async function loadDashboardData() {
             if (usersEl) usersEl.innerText = statsData.activeUsers.toLocaleString();
 
             // Lógica final de Admin Stats
-            const tableBody = document.getElementById('adminUsersTableBody');
+            if (typeof window.loadAdminUsers !== 'function') {
+                window.loadAdminUsers = async () => {
+                    const tableBody = document.getElementById('adminUsersTableBody');
+                    if (!tableBody) return;
 
-            if (tableBody) {
-                const usersData = await ApiService.getAdminUsers();
-                tableBody.innerHTML = '';
-                
-                window.adminUsersDataMap = {}; // Global cache for direct actions
-
-                if (!usersData || !usersData.users || usersData.users.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay usuarios registrados</td></tr>';
-                } else {
-                    usersData.users.forEach(user => {
-                        window.adminUsersDataMap[user.id] = user;
+                    try {
+                        const usersData = await ApiService.getAdminUsers();
+                        tableBody.innerHTML = '';
                         
-                        const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-blue-50/50 transition group'; // Removido cursor-pointer y onclick global
+                        window.adminUsersDataMap = {}; // Global cache for direct actions
 
-                        const initials = (user.firstName.charAt(0) + user.lastName.charAt(0)).toUpperCase();
-                        const returnClass = user.annualReturnRate > 0 ? 'text-fintech-success' : 'text-gray-500';
-                        const riskStr = user.riskProfile === 'Moderate' ? 'Moderado' : (user.riskProfile === 'High' ? 'Agresivo' : 'Conservador');
+                        if (!usersData || !usersData.users || usersData.users.length === 0) {
+                            tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay usuarios registrados</td></tr>';
+                        } else {
+                            usersData.users.forEach(user => {
+                                window.adminUsersDataMap[user.id] = user;
+                                
+                                const tr = document.createElement('tr');
+                                tr.className = 'hover:bg-blue-50/50 transition group'; // Removido cursor-pointer y onclick global
 
-                        tr.innerHTML = `
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold mr-3">${initials}</div>
-                                    <div>
-                                        <p class="font-medium text-black transition">
-                                            <span class="cursor-pointer text-blue-600 hover:text-blue-800 hover:underline font-bold transition-colors" onclick="triggerImpersonation(event, ${user.id}, '${user.firstName} ${user.lastName}')">${user.firstName} ${user.lastName}</span>
-                                        </p>
-                                        <p class="text-xs text-gray-500">${user.email}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 font-medium ${returnClass}">${user.annualReturnRate}%</td>
-                            <td class="px-6 py-4 font-bold text-fintech-textMain">${formatter.format(user.totalBalance)}</td>
-                            <td class="px-6 py-4"><span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs">${riskStr}</span></td>
-                            <td class="px-6 py-4 sticky right-0 bg-white z-10 shadow-[-4px_0_10px_rgba(0,0,0,0.05)]">
-                                <div class="flex items-center justify-end gap-2 transition-opacity">
-                                    <button onclick="triggerImpersonation(event, ${user.id}, '${user.firstName} ${user.lastName}')" title="Ver Dashboard de Cliente" class="text-fintech-primary p-2 bg-gray-50 hover:bg-fintech-primary hover:text-white rounded border border-transparent hover:border-fintech-primary transition">
-                                        <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                    </button>
-                                    <button onclick="handleUserPanelClick(event, ${user.id}, 'profile')" title="Modificar Perfil Financiero" class="text-fintech-textSec p-2 bg-gray-50 hover:bg-gray-200 hover:text-black rounded border border-transparent transition">
-                                        <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                                    </button>
-                                    <button onclick="handleUserPanelClick(event, ${user.id}, 'transaction')" title="Registrar Transacción" class="text-fintech-success p-2 bg-gray-50 hover:bg-green-600 hover:text-white rounded border border-transparent transition">
-                                        <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                        tableBody.appendChild(tr);
-                    });
-                }
+                                const initials = (user.firstName.charAt(0) + user.lastName.charAt(0)).toUpperCase();
+                                const returnClass = user.annualReturnRate > 0 ? 'text-fintech-success' : 'text-gray-500';
+                                const riskStr = user.riskProfile === 'Moderate' ? 'Moderado' : (user.riskProfile === 'High' ? 'Agresivo' : 'Conservador');
+
+                                const formatterInternal = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+
+                                tr.innerHTML = `
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <div class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold mr-3">${initials}</div>
+                                            <div>
+                                                <p class="font-medium text-black transition">
+                                                    <span class="cursor-pointer text-blue-600 hover:text-blue-800 hover:underline font-bold transition-colors" onclick="triggerImpersonation(event, ${user.id}, '${user.firstName} ${user.lastName}')">${user.firstName} ${user.lastName}</span>
+                                                </p>
+                                                <p class="text-xs text-gray-500">${user.email}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 font-medium ${returnClass}">${user.annualReturnRate}%</td>
+                                    <td class="px-6 py-4 font-bold text-fintech-textMain">${formatterInternal.format(user.totalBalance)}</td>
+                                    <td class="px-6 py-4"><span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded text-xs">${riskStr}</span></td>
+                                    <td class="px-6 py-4 sticky right-0 bg-white z-10 shadow-[-4px_0_10px_rgba(0,0,0,0.05)]">
+                                        <div class="flex items-center justify-end gap-2 transition-opacity">
+                                            <button onclick="triggerImpersonation(event, ${user.id}, '${user.firstName} ${user.lastName}')" title="Ver Dashboard de Cliente" class="text-fintech-primary p-2 bg-gray-50 hover:bg-fintech-primary hover:text-white rounded border border-transparent hover:border-fintech-primary transition">
+                                                <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            </button>
+                                            <button onclick="handleUserPanelClick(event, ${user.id}, 'profile')" title="Modificar Perfil Financiero" class="text-fintech-textSec p-2 bg-gray-50 hover:bg-gray-200 hover:text-black rounded border border-transparent transition">
+                                                <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                            </button>
+                                            <button onclick="handleUserPanelClick(event, ${user.id}, 'transaction')" title="Registrar Transacción" class="text-fintech-success p-2 bg-gray-50 hover:bg-green-600 hover:text-white rounded border border-transparent transition">
+                                                <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path class="pointer-events-none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                `;
+                                tableBody.appendChild(tr);
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Error loadAdminUsers:', err);
+                    }
+                };
             }
+            await window.loadAdminUsers();
 
             // Inyectar y Renderizar Data Mock para Dashboard V3 (Chart y Recent)
             setTimeout(() => {
@@ -664,7 +692,7 @@ window.loginAsUser = function() {
 window.exitImpersonationMode = function() {
     localStorage.removeItem('impersonatingId');
     localStorage.removeItem('impersonatingName');
-    // document.body.style.paddingTop = '0'; // Clean layout padding
+    document.body.style.paddingTop = '0'; // Clean layout padding
     window.location.href = 'Admin.html#users';
 };
 
@@ -1072,9 +1100,12 @@ window.handleProfileUpdate = async function (event) {
 };
 
 // --- WITHDRAWAL ACTIONS (3 ACTOS) ---
-window.handleWithdrawalSubmit = function (event) {
+window.handleWithdrawalSubmit = async function (event) {
     event.preventDefault();
     const form = event.target;
+    const amount = form.withdrawalAmount.value;
+    const bankName = form.withdrawalBank.value;
+    const holder = form.withdrawalHolder.value;
     const clabe = form.withdrawalClabe.value;
 
     const stateForm = document.getElementById('withdrawalStateForm');
@@ -1089,29 +1120,48 @@ window.handleWithdrawalSubmit = function (event) {
     stateProcessing.classList.add('block');
     closeBtn.classList.add('hidden');
 
-    processingText.innerText = `Cifrando conexión para CLABE terminada en ${clabe.slice(-4)}...`;
+    processingText.innerText = `Procesando solicitud de retiro por $${amount}...`;
 
-    const errorMessages = [
-        "Error de conexión con el banco receptor (Timeout). Tu saldo está intacto. Por favor, reintenta más tarde.",
-        "El sistema interbancario SPEI se encuentra en ventana de mantenimiento. Intenta de nuevo en un par de horas.",
-        "Por normatividad, los retiros hacia cuentas CLABE de reciente registro requieren validación manual. Contacta a soporte.",
-        "Horario fuera de operación. Los retiros interbancarios se procesan exclusivamente en días hábiles de 9:00 AM a 5:00 PM."
-    ];
-
-    const delay = Math.floor(Math.random() * (4500 - 3500 + 1)) + 3500;
-
-    setTimeout(() => {
+    try {
+        const res = await ApiService.requestWithdrawal({
+            amount: amount,
+            bankName: bankName,
+            accountHolder: holder,
+            clabe: clabe
+        });
+        
         stateProcessing.classList.add('hidden');
         stateProcessing.classList.remove('block');
-
-        const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)];
-        document.getElementById('resultText').innerText = randomError;
+        
+        document.getElementById('resultText').innerText = res.message || "Solicitud de retiro registrada correctamente. La administración la validará en breve.";
+        document.getElementById('resultText').classList.replace('text-red-500', 'text-green-600');
+        // Icon update to success
+        document.querySelector('#withdrawalStateResult svg').outerHTML = `
+            <svg class="w-16 h-16 text-green-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        `;
+        
+        stateResult.classList.remove('hidden');
+        stateResult.classList.add('block');
+        closeBtn.classList.remove('hidden');
+    } catch (err) {
+        stateProcessing.classList.add('hidden');
+        stateProcessing.classList.remove('block');
+        
+        document.getElementById('resultText').innerText = err.message || "Ocurrió un error al procesar tu solicitud.";
+        document.getElementById('resultText').classList.replace('text-green-600', 'text-red-500');
+        // Restore error icon just in case
+        document.querySelector('#withdrawalStateResult svg').outerHTML = `
+            <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+        `;
 
         stateResult.classList.remove('hidden');
         stateResult.classList.add('block');
-
-        form.reset();
-    }, delay);
+        closeBtn.classList.remove('hidden');
+    }
 };
 
 window.closeWithdrawalModal = function () {
@@ -1148,7 +1198,7 @@ function initImpersonationMode() {
     if (impersonatingId && userStr) {
         try {
             const user = JSON.parse(userStr);
-            if (user.role === 'superadmin' || user.role === 'subadmin') {
+            if (user.role === 'superadmin' || user.role === 'subadmin' || user.role === 'admin') {
                 
                 // Remover banner estático si existiera
                 const oldBanner = document.getElementById('impersonationBannerProfile');
@@ -1156,7 +1206,7 @@ function initImpersonationMode() {
 
                 // Inyección Dinámica del Banner Solicitado
                 const bannerHtml = `
-                    <div id="dynamicImpersonationBanner" class="block w-full bg-red-600 text-white z-[9999] p-3 flex justify-between items-center shadow-lg h-14">
+                    <div id="dynamicImpersonationBanner" class="fixed top-0 left-0 w-full bg-red-600 text-white z-[9999] p-3 flex justify-between items-center shadow-lg h-14">
                         <div class="flex items-center gap-3">
                             <span class="inline-flex items-center h-2.5 w-2.5 rounded-full bg-white animate-pulse"></span>
                             <p class="text-xs md:text-sm">MODO VISTA: <span class="font-bold">${impersonatingName}</span></p>
@@ -1167,7 +1217,7 @@ function initImpersonationMode() {
                     </div>
                 `;
                 document.body.insertAdjacentHTML('afterbegin', bannerHtml);
-                // document.body.style.paddingTop = '3.5rem'; // Eliminado en Asalto 6.7
+                document.body.style.paddingTop = '3.5rem'; // Re-habilitado para compensar el banner fixed
                 
                 const sidebarNameEl = document.getElementById('sidebarUserName');
                 const greetingEl = document.getElementById('userGreeting');
@@ -1371,7 +1421,7 @@ window.loadRecentTransactions = async function() {
                 displayUser = `${mapUser.firstName} ${mapUser.lastName}`.trim();
             }
             tr.innerHTML = `
-                <td class="px-4 py-3 font-bold text-black">${displayUser}</td>
+                <td class="px-4 py-3 font-bold text-blue-600 cursor-pointer hover:text-blue-800 hover:underline transition-colors" onclick="triggerImpersonation(event, ${tx.userId}, '${displayUser}')">${displayUser}</td>
                 <td class="px-4 py-3 text-gray-500">${dateStr}</td>
                 <td class="px-4 py-3 text-gray-600">${typeStr}</td>
                 <td class="px-4 py-3 font-bold text-right ${amountColor}">${formatter.format(tx.amount)}</td>
@@ -1493,3 +1543,77 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// --- ADMIN WITHDRAWALS LOGIC ---
+window.loadAdminWithdrawals = async function() {
+    const tbody = document.getElementById('adminWithdrawalsBody');
+    if(!tbody) return;
+    
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8"><div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-fintech-primary"></div></td></tr>';
+    
+    try {
+        const res = await ApiService.getAdminWithdrawals();
+        if(res.status !== 'success') throw new Error(res.message);
+        
+        const withdrawals = res.withdrawals || [];
+        if(withdrawals.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">No hay solicitudes de retiro pendientes ni completadas.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        withdrawals.forEach(w => {
+            // Reemplazar espacio por 'T' para asegurar compatibilidad en Safari/iOS al parsear fechas MySQL
+            const safeDate = w.date ? w.date.replace(' ', 'T') : null;
+            const dateStr = safeDate ? new Date(safeDate).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) : 'N/A';
+            const amountStr = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(w.amount);
+            
+            let statusBadge = '';
+            let actionBtns = '';
+            if(w.status === 'pending') {
+                statusBadge = '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">Pendiente</span>';
+                actionBtns = `
+                    <button onclick="completeAdminWithdrawalAction(${w.id}, 'complete')" class="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700 transition shadow-sm mr-2">Completar</button>
+                    <button onclick="completeAdminWithdrawalAction(${w.id}, 'reject')" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700 transition shadow-sm">Rechazar</button>
+                `;
+            } else if(w.status === 'completed') {
+                statusBadge = '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">Completado</span>';
+                actionBtns = `<span class="text-gray-400 text-xs">Sin acciones</span>`;
+            } else if(w.status === 'rejected') {
+                statusBadge = '<span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full">Rechazado</span>';
+                actionBtns = `<span class="text-gray-400 text-xs">Sin acciones</span>`;
+            }
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">#${w.id}<br><span class="text-xs text-gray-500">${dateStr}</span></td>
+                <td class="px-6 py-4 text-sm text-gray-800 font-semibold">${w.firstName} ${w.lastName}<br><span class="text-xs text-gray-500 font-normal">${w.email}</span></td>
+                <td class="px-6 py-4 text-sm font-bold text-gray-900">${amountStr}</td>
+                <td class="px-6 py-4 text-sm text-gray-700">${w.details.bankName}<br><span class="text-xs text-gray-500">${w.details.accountHolder} | CLABE/T: ${w.details.clabe}</span></td>
+                <td class="px-6 py-4">${statusBadge}</td>
+                <td class="px-6 py-4 text-right">${actionBtns}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch(err) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-red-500">Error cargando solicitudes.</td></tr>';
+        showToast(err.message, 'danger');
+    }
+};
+
+window.completeAdminWithdrawalAction = async function(id, action) {
+    if(!confirm(`¿Estás seguro de que deseas ${action === 'complete' ? 'COMPLETAR' : 'RECHAZAR'} esta solicitud de retiro?`)) return;
+    
+    try {
+        const res = await ApiService.completeAdminWithdrawal(id, action);
+        if(res.status === 'success') {
+            showToast(`Solicitud ${action === 'complete' ? 'completada' : 'rechazada'} correctamente.`, 'success');
+            loadAdminWithdrawals(); // Recargar la lista
+            if(typeof loadRecentTransactions === 'function') loadRecentTransactions();
+        } else {
+            throw new Error(res.message);
+        }
+    } catch(err) {
+        showToast(err.message, 'danger');
+    }
+};

@@ -73,6 +73,7 @@ const ApiService = {
         const config = {
             method,
             headers,
+            cache: 'no-store'
         };
 
         if (body) {
@@ -100,7 +101,7 @@ const ApiService = {
             if (impId && userStr) {
                 try {
                     const u = JSON.parse(userStr);
-                    if (u.role === 'superadmin' || u.role === 'subadmin') userId = impId;
+                    if (['superadmin', 'subadmin', 'admin'].includes(u.role)) userId = impId;
                 } catch(e){}
             }
         }
@@ -142,7 +143,7 @@ const ApiService = {
             if (impId && userStr) {
                 try {
                     const u = JSON.parse(userStr);
-                    if (u.role === 'superadmin' || u.role === 'subadmin') userId = impId;
+                    if (['superadmin', 'subadmin', 'admin'].includes(u.role)) userId = impId;
                 } catch(e){}
             }
         }
@@ -158,6 +159,21 @@ const ApiService = {
     // 9. Historial Transacciones (Admin)
     async getAdminTransactions() {
         return this.request('/admin/list_transactions.php');
+    },
+
+    // 10. Solicitar Retiro (User)
+    async requestWithdrawal(data) {
+        return this.request('/user/request_withdrawal.php', 'POST', data);
+    },
+
+    // 11. Listar Solicitudes de Retiro (Admin)
+    async getAdminWithdrawals() {
+        return this.request('/admin/list_withdrawals.php');
+    },
+
+    // 12. Completar Solicitud de Retiro (Admin)
+    async completeAdminWithdrawal(transactionId, action) {
+        return this.request('/admin/complete_withdrawal.php', 'POST', { transactionId, action });
     },
 
     // 10. Crear Usuario (Admin)
