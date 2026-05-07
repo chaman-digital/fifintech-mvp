@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Latticework | Banca digital para empresas mayoristas</title>
+    <title>Latticework | Banca Digital para visionarios inversores en México</title>
 
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
     <link rel="manifest" href="site.webmanifest">
 
-    <meta name="description" content="Latticework is the first B2B cryptocurrency exchange designed for international businesses. Access a US-based virtual bank account to buy, sell, and transfer crypto.">
-    <meta property="og:title" content="Latticework | Banca digital para empresas mayoristas">
+    <meta name="description" content="Banca Digital para visionarios inversores en México">
+    <meta property="og:title" content="Latticework | Banca Digital para visionarios inversores en México">
     <meta property="og:description" content="Latticework is the first B2B cryptocurrency exchange designed for international businesses.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://latticework.mx/">
@@ -250,7 +250,7 @@
 
                 <!-- Call to action button WhatsApp -->
                 <div class="mt-10 md:mt-16 text-center">
-                    <a href="https://wa.me/525529067289?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." onclick="gtag('event', 'generate_lead', {'event_category': 'WhatsApp', 'event_label': 'Mid_CTA'});" target="_blank" class="inline-flex items-center justify-center bg-[#25D366] hover:bg-[#128C7E] text-white font-bold px-8 py-4 rounded-full transition text-lg btn-gbm mb-12">
+                    <a href="https://wa.me/525516862232?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." onclick="gtag('event', 'generate_lead', {'event_category': 'WhatsApp', 'event_label': 'Mid_CTA'});" target="_blank" class="inline-flex items-center justify-center bg-[#25D366] hover:bg-[#128C7E] text-white font-bold px-8 py-4 rounded-full transition text-lg btn-gbm mb-12">
                         Contactar por WhatsApp
                     </a>
                 </div>
@@ -682,7 +682,7 @@
             <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
                 <p>Copyright &copy; 2026 Latticework. Todos los derechos reservados.</p>
                 <div class="flex space-x-6 mt-6 md:mt-0 font-medium text-gray-500">
-                    <a href="https://wa.me/525529067289?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." target="_blank" class="hover:text-gbm-black transition">WhatsApp</a>
+                    <a href="https://wa.me/525516862232?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." target="_blank" class="hover:text-gbm-black transition">WhatsApp</a>
                 </div>
             </div>
         </div>
@@ -713,7 +713,7 @@
             </form>
             <div class="mt-6 text-center text-sm text-gray-600">
                 ¿Aún no tienes cuenta? <br>
-                <a href="https://wa.me/525529067289?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." target="_blank" class="text-gbm-black font-bold hover:underline">Contacta a un asesor para abrir una</a>
+                <a href="https://wa.me/525516862232?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." target="_blank" class="text-gbm-black font-bold hover:underline">Contacta a un asesor para abrir una</a>
             </div>
             <div class="mt-4 text-center">
                 <button type="button" onclick="document.getElementById('modalLogin').classList.add('hidden')" class="text-sm font-medium text-gray-500 hover:text-black transition">Cancelar</button>
@@ -787,7 +787,7 @@
         });
     </script>
     <!-- WhatsApp Floating Button -->
-    <a href="https://wa.me/525529067289?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." onclick="gtag('event', 'generate_lead', {'event_category': 'WhatsApp', 'event_label': 'Floating_Button'});" target="_blank" class="fixed bottom-6 left-6 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 flex items-center justify-center group">
+    <a href="https://wa.me/525516862232?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." onclick="gtag('event', 'generate_lead', {'event_category': 'WhatsApp', 'event_label': 'Floating_Button'});" target="_blank" class="fixed bottom-6 left-6 z-[100] bg-[#25D366] text-white p-4 rounded-full shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-300 flex items-center justify-center group">
         <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 0 5.388 0 12.04c0 2.115.548 4.188 1.587 6.012L.05 24l6.095-1.597c1.785.952 3.791 1.453 5.882 1.453h.004c6.645 0 12.031-5.388 12.031-12.04C24.062 5.388 18.675 0 12.031 0zm0 21.905c-1.802 0-3.558-.485-5.11-1.406l-.366-.217-3.8.995 1.014-3.705-.238-.38c-1.01-1.611-1.543-3.483-1.543-5.418 0-5.632 4.582-10.218 10.218-10.218 5.632 0 10.218 4.586 10.218 10.218 0 5.633-4.586 10.218-10.218 10.218zm5.6-7.653c-.307-.154-1.818-.899-2.1-1.002-.282-.103-.487-.154-.693.154-.205.308-.795 1.002-.975 1.208-.18.205-.359.231-.667.077-1.411-.703-2.529-1.53-3.51-2.906-.255-.357.256-.328.847-1.503.076-.154.038-.282-.038-.436-.077-.154-.693-1.67-.949-2.287-.25-.6-.505-.519-.693-.529-.18-.01-.385-.01-.591-.01-.205 0-.539.077-.821.385-.282.308-1.077 1.052-1.077 2.566s1.103 2.977 1.257 3.182c.154.205 2.169 3.31 5.253 4.641.733.316 1.305.505 1.752.646.736.233 1.405.2 1.933.12.593-.089 1.818-.744 2.074-1.463.256-.718.256-1.334.18-1.463-.077-.128-.282-.205-.59-.359z"></path></svg>
     </a>
 </body>

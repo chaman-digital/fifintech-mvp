@@ -204,7 +204,7 @@
             <div class="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
                 <p>Copyright &copy; 2026 Latticework. Todos los derechos reservados.</p>
                 <div class="flex space-x-6 mt-6 md:mt-0 font-medium text-gray-500">
-                    <a href="https://wa.me/525529067289?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." target="_blank" class="hover:text-gbm-black transition">WhatsApp</a>
+                    <a href="https://wa.me/525516862232?text=Hola.%20Me%20interesa%20invertir,%20por%20favor%20comun%C3%ADquense%20conmigo." target="_blank" class="hover:text-gbm-black transition">WhatsApp</a>
                 </div>
             </div>
         </div>

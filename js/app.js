@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDashboardData();
     setupAdminSearch();
     updateSidebarUserInfo();
+    initWithdrawalValidations();
 });
 
 // --- AUTH & SECURITY ---
@@ -104,6 +105,46 @@ function initUI() {
         const cardsPanel = document.getElementById('cardsPanel');
         if (menuBtn) menuBtn.classList.remove('hidden');
         if (cardsPanel) cardsPanel.classList.remove('hidden');
+    };
+
+    // --- WITHDRAWAL VALIDATIONS ---
+    window.initWithdrawalValidations = function() {
+        const amountInput = document.getElementById('withdrawalAmount');
+        const clabeInput = document.getElementById('withdrawalClabe');
+        const holderInput = document.getElementById('withdrawalHolder');
+        const bankInput = document.getElementById('withdrawalBank');
+
+        if (amountInput) {
+            amountInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9.]/g, '');
+            });
+        }
+
+        if (clabeInput) {
+            clabeInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                if (this.value.length >= 18 && bankInput) {
+                    const prefix = this.value.substring(0, 3);
+                    const bankMap = {
+                        '002': 'Banamex', '012': 'BBVA', '014': 'Santander', '021': 'HSBC',
+                        '030': 'Bajío', '044': 'Scotiabank', '058': 'Banregio', '062': 'Afirme',
+                        '072': 'Banorte', '127': 'Azteca', '137': 'Bancoppel', '143': 'CIBanco',
+                        '148': 'CIBanco', '646': 'STP', '654': 'Nubank', '659': 'Opciones Empresariales del Noroeste',
+                        '906': 'Mercado Pago', '656': 'Ualá'
+                    };
+                    if (bankMap[prefix] && !bankInput.value) {
+                        bankInput.value = bankMap[prefix];
+                    }
+                }
+            });
+        }
+
+        if (holderInput) {
+            holderInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase().replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '');
+            });
+        }
     };
 
     // --- ADMIN SPA NAVIGATION LÓGICA ---
