@@ -152,6 +152,24 @@
             scrollbar-width: none;
         }
     </style>
+
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '886921724397920');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=886921724397920&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
 </head>
 
 <body class="bg-white text-gbm-dark antialiased selection:bg-gbm-black selection:text-white overflow-x-hidden">
@@ -784,6 +802,16 @@
                 
                 startAutoPlay();
             }
+
+            // Meta Ads Custom Event Tracking for WhatsApp Clicks
+            const whatsappLinks = document.querySelectorAll('a[href*="wa.me"]');
+            whatsappLinks.forEach(function(link) {
+                link.addEventListener('click', function() {
+                    if (typeof fbq === 'function') {
+                        fbq('track', 'Contact'); // Firing Contact standard event for Meta Ads
+                    }
+                });
+            });
         });
     </script>
     <!-- WhatsApp Floating Button -->
